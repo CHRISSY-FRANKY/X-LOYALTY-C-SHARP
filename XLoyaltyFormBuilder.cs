@@ -1,4 +1,7 @@
 // X Loyalty Form Builder Class to improve readability
+using System.ComponentModel;
+using Microsoft.Extensions.Hosting;
+
 public class XLoyaltyFormBuilder
 {
     private Form form;
@@ -7,6 +10,7 @@ public class XLoyaltyFormBuilder
     private PictureBox elonFrowningPictureBox;
     private PictureBox elonSmilingPictureBox;
     private PictureBox elonGoFYourselfPictureBox;
+    private Button submitTryAgainButton;
 
     public XLoyaltyFormBuilder(string text, Size formSize)
     {
@@ -14,7 +18,7 @@ public class XLoyaltyFormBuilder
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
         // Create form based on arguments provided
-        this.form = new Form
+        form = new Form
         {
             Text = text,
             MaximizeBox = false,
@@ -29,7 +33,7 @@ public class XLoyaltyFormBuilder
     public XLoyaltyFormBuilder AddIntroLabel(string text, Point location, Size size)
     {
         // Create the label
-        this.introLabel = new()
+        introLabel = new()
         {
             Text = text,
             Location = location,
@@ -46,7 +50,7 @@ public class XLoyaltyFormBuilder
     public XLoyaltyFormBuilder AddUsernameTextBox(string text, Point location, Size size)
     {
         // Add the text box to the form
-        TextBox usernameTextBox = new()
+        usernameTextBox = new()
         {
             Text = text,
             Location = location,
@@ -123,6 +127,92 @@ public class XLoyaltyFormBuilder
         };
         return this;
     }
+
+
+    // Add a button to submit username and to try again
+    public XLoyaltyFormBuilder AddSubmitTryAgainButton(string text, Point location, Size size, Func<string, Task<string>> TestEndpoint, IHost? host)
+    {
+        // Create a submit try again button to submit a request to the x api for username search
+        submitTryAgainButton = new Button
+        {
+            Text = text,
+            Location = location,
+            Size = size,
+            BackColor = Color.White,
+            ForeColor = Color.Black,
+            TextAlign = ContentAlignment.MiddleCenter
+        };
+        form.Controls.Add(submitTryAgainButton);
+        // Add an asynchronous event handler
+        submitTryAgainButton.Click += async (sender, e) =>
+        {
+            // Disable the button right away to not lodge the pipeline
+            submitTryAgainButton.Enabled = false;
+            // Just hide the elon images
+            elonFrowningPictureBox.Visible = false;
+            elonSmilingPictureBox.Visible = false;
+            elonGoFYourselfPictureBox.Visible = false;
+            try
+            {
+                // X usernames are only supposed to be alphanumeric
+                if (usernameTextBox.Text.All(char.IsLetterOrDigit))
+                {
+                    string response = await TestEndpoint(usernameTextBox.Text);
+                    // Something went wrong
+                    if (response == "error")
+                    {
+                        // Just flash the error for 5 seconds and quit
+                        introLabel.Text = "Something went wrong on our end!";
+                        Thread.Sleep(5000);
+                        Application.Exit();
+                    }
+                    // Username exists
+                    else if (response == "1")
+                    {
+                        elonFrowningPictureBox.Visible = false;
+                        elonSmilingPictureBox.Visible = true;
+                        elonGoFYourselfPictureBox.Visible = false;
+                    }
+                    // Username doesn't exist
+                    else if (response == "0")
+                    {
+                        elonFrowningPictureBox.Visible = true;
+                        elonSmilingPictureBox.Visible = false;
+                        elonGoFYourselfPictureBox.Visible = false;
+                    }
+                    else if (response == "-1")
+                    {
+                        elonFrowningPictureBox.Visible = false;
+                        elonSmilingPictureBox.Visible = false;
+                        elonGoFYourselfPictureBox.Visible = true;
+
+                    }
+                }
+                else
+                {
+                    submitTryAgainButton.Text = "Try Again";
+                }
+            }
+            catch (Exception ex)
+            {
+                // Just flash the error for 5 seconds and quit
+                introLabel.Text = ex.Message;
+                Thread.Sleep(5000);
+                Application.Exit();
+            }
+            submitTryAgainButton.Enabled = true;
+        };
+        // Kill the host when you kill the form
+        form.FormClosed += async (sender, e) => await host.StopAsync();
+        return this;
+    }
+
+    public XLoyaltyFormBuilder Run()
+    {
+        Application.Run(form);
+        return this;
+    }
+
 
     public Form GetForm()
     {

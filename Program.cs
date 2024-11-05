@@ -97,7 +97,6 @@ static async Task<string> TestEndpoint(string xUsername)
         client.Dispose();
         return "error";
     }
-
 }
 // Build the custom host builder
 var host = builder.Build();
@@ -106,92 +105,12 @@ var hostTask = host.RunAsync();
 
 // Custom intro label text
 string introLabelText = "\nWelcome to X LOYALTY!\nEnter an X account username (alphanumeric) to determine if it exists or not!";
-
-// Create the form builder
+// Create the form builder to build the x loyalty form
 XLoyaltyFormBuilder form = new XLoyaltyFormBuilder("X LOYALTY", new Size(420, 420))
 .AddIntroLabel(introLabelText, new Point(0, 0), new Size(420, 60))
 .AddUsernameTextBox("Enter Username Here!", new Point(105, 60), new Size(210, 180))
 .AddElonSmilingPictureBox("elonSmiling.jpg", new Point(0, 180), new Size(420, 200))
 .AddElonFrowningPictureBox("elonFrowning.jpeg", new Point(0, 180), new Size(420, 200))
-.AddElonGoFYourselfPictureBox("elonFYourself.jpg", new Point(0, 180), new Size(420, 200));
-
-// Add a button to submit username and to try again
-var submitTryAgainButton = new Button
-{
-    Text = "Go",
-    Location = new Point(180, 120),
-    Size = new Size(60, 30),
-    BackColor = Color.White,
-    ForeColor = Color.Black,
-    TextAlign = ContentAlignment.MiddleCenter
-};
-form.GetForm().Container.Add(submitTryAgainButton);
-
-    // Location = new Point(0, 180),
-    //     Size = new Size(420, 200),
-
-// Add an asynchronous event handler
-submitTryAgainButton.Click += async (sender, e) =>
-{
-    // Disable the button right away to not lodge the pipeline
-    submitTryAgainButton.Enabled = false;
-    // Just hide the elon images
-    elonFrowningImage.Visible = false;
-    elonSmilingImage.Visible = false;
-    elonFYourselfImage.Visible = false;
-    try
-    {
-        // X usernames are only supposed to be alphanumeric
-        if (usernameTextBox.Text.All(char.IsLetterOrDigit))
-        {
-            string response = await TestEndpoint(usernameTextBox.Text);
-            // Something went wrong
-            if (response == "error")
-            {
-                // Just flash the error for 5 seconds and quit
-                label.Text = "Something went wrong on our end!";
-                Thread.Sleep(5000);
-                Application.Exit();
-            }
-            // Username exists
-            else if (response == "1")
-            {
-                elonSmilingImage.Visible = true;
-                elonFrowningImage.Visible = false;
-                elonFYourselfImage.Visible = false;
-            }
-            // Username doesn't exist
-            else if (response == "0")
-            {
-                elonFrowningImage.Visible = true;
-                elonSmilingImage.Visible = false;
-                elonFYourselfImage.Visible = false;
-            }
-            else if (response == "-1")
-            {
-                elonFYourselfImage.Visible = true;
-                elonFrowningImage.Visible = false;
-                elonSmilingImage.Visible = false;
-   
-            }
-        }
-        else
-        {
-            submitTryAgainButton.Text = "Try Again";
-        }
-    }
-    catch (Exception ex)
-    {
-        // Just flash the error for 5 seconds and quit
-        label.Text = ex.Message;
-        Thread.Sleep(5000);
-        Application.Exit();
-    }
-    submitTryAgainButton.Enabled = true;
-};
-// Add the button to the form
-form.GetForm().Controls.Add(submitTryAgainButton);
-// Kill the host when you kill the form
-form.GetForm().FormClosed += async (sender, e) => await host.StopAsync();
-// Run the form
-Application.Run(form.GetForm());
+.AddElonGoFYourselfPictureBox("elonFYourself.jpg", new Point(0, 180), new Size(420, 200))
+.AddSubmitTryAgainButton("Go", new Point(180, 120), new Size(60, 30), TestEndpoint, host)
+.Run();
