@@ -104,22 +104,13 @@ var host = builder.Build();
 // Start the host in the background
 var hostTask = host.RunAsync();
 
+// Custom intro label text
+string introLabelText = "\nWelcome to X LOYALTY!\nEnter an X account username (alphanumeric) to determine if it exists or not!";
 
 // Create the form builder
-XLoyaltyFormBuilder form = new XLoyaltyFormBuilder("X LOYALTY", new Size(420, 420));
- 
-// Create the label
-var label = new Label
-{
-    Text = "\nWelcome to X LOYALTY!\nEnter an X account username (alphanumeric) to determine if it exists or not!",
-    Location = new System.Drawing.Point(0, 0),
-    Size = new System.Drawing.Size(420, 60),
-    BackColor = System.Drawing.Color.Black,
-    ForeColor = System.Drawing.Color.White,
-    TextAlign = ContentAlignment.TopCenter
-};
-// Add the label to the form
-form.GetForm().Controls.Add(label);
+XLoyaltyFormBuilder form = new XLoyaltyFormBuilder("X LOYALTY", new Size(420, 420))
+.AddIntroLabel(introLabelText, new System.Drawing.Point(0, 0), new System.Drawing.Size(420, 60));
+
 // Add the textfield to the form
 var usernameTextBox = new TextBox
 {
