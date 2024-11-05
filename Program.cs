@@ -110,7 +110,10 @@ string introLabelText = "\nWelcome to X LOYALTY!\nEnter an X account username (a
 // Create the form builder
 XLoyaltyFormBuilder form = new XLoyaltyFormBuilder("X LOYALTY", new Size(420, 420))
 .AddIntroLabel(introLabelText, new Point(0, 0), new Size(420, 60))
-.AddUsernameTextBox("Enter Username Here!", new Point(105, 60), new Size(210, 180));
+.AddUsernameTextBox("Enter Username Here!", new Point(105, 60), new Size(210, 180))
+.AddElonSmilingPictureBox("elonSmiling.jpg", new Point(0, 180), new Size(420, 200))
+.AddElonFrowningPictureBox("elonFrowning.jpeg", new Point(0, 180), new Size(420, 200))
+.AddElonGoFYourselfPictureBox("elonFYourself.jpg", new Point(0, 180), new Size(420, 200));
 
 // Add a button to submit username and to try again
 var submitTryAgainButton = new Button
@@ -122,44 +125,11 @@ var submitTryAgainButton = new Button
     ForeColor = Color.Black,
     TextAlign = ContentAlignment.MiddleCenter
 };
-// Create elon smiling to show the user when the username exists
-var elonSmilingImage = new PictureBox
-{
-    Image = Image.FromFile("elonSmiling.jpg"),
-    Location = new Point(0, 180),
-    Size = new Size(420, 200),
-    SizeMode = PictureBoxSizeMode.Zoom,
-};
-form.GetForm().Controls.Add(elonSmilingImage);
-elonSmilingImage.Visible = false;
-// Create elon frowning to show the user when the username is non existant
-var elonFrowningImage = new PictureBox
-{
-    Image = Image.FromFile("elonFrowning.jpeg"),
-    Location = new Point(0, 180),
-    Size = new Size(420, 200),
-    SizeMode = PictureBoxSizeMode.Zoom,
-};
-form.GetForm().Controls.Add(elonFrowningImage);
-elonFrowningImage.Visible = false;
-// Create elon saying go fuck yourself image for too many requests
-var elonFYourselfImage = new PictureBox
-{
-    Image = Image.FromFile("elonFYourself.jpg"),
-    Location = new Point(0, 180),
-    Size = new Size(420, 200),
-    SizeMode = PictureBoxSizeMode.Zoom,
-};
-form.GetForm().Controls.Add(elonFYourselfImage);
-elonFYourselfImage.Visible = false;
-// When the username textbox is selected it hides the images
-usernameTextBox.Click += async (sender, e) =>
-{
-    // Just hide the elon images
-    elonFrowningImage.Visible = false;
-    elonSmilingImage.Visible = false;
-    elonFYourselfImage.Visible = false;
-};
+form.GetForm().Container.Add(submitTryAgainButton);
+
+    // Location = new Point(0, 180),
+    //     Size = new Size(420, 200),
+
 // Add an asynchronous event handler
 submitTryAgainButton.Click += async (sender, e) =>
 {
