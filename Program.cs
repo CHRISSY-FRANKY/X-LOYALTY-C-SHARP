@@ -26,7 +26,7 @@ var builder = Host.CreateDefaultBuilder(args).ConfigureWebHostDefaults(webBuilde
         app.UseEndpoints(endpoints =>
         {
             // Define Get Lists of Followers and Following
-            endpoints.MapGet("/GetLists", async (string username, IConfiguration configuration, HttpResponse response) =>
+            endpoints.MapGet("/VerifyUsername", async (string username, IConfiguration configuration, HttpResponse response) =>
             {
                 try
                 {
@@ -83,7 +83,7 @@ static async Task<string> TestEndpoint(string xUsername)
     // Create local http client
     var client = new HttpClient();
     // Get a request from a response sent
-    var response = await client.GetAsync($"http://localhost:5115/GetLists?username={xUsername}");
+    var response = await client.GetAsync($"http://localhost:5115/VerifyUsername?username={xUsername}");
     // Respond based on the response
     if (response.IsSuccessStatusCode)
     {
