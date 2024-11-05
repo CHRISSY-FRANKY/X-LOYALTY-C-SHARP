@@ -73,6 +73,11 @@ public class XLoyaltyFormBuilder
         };
         form.Controls.Add(elonSmilingPictureBox);
         elonSmilingPictureBox.Visible = false;
+        // When the username text box is clicked, the picture box is hidden
+        usernameTextBox.Click += (sender, e) =>
+        {
+            elonSmilingPictureBox.Visible = false;
+        };
         return this;
     }
 
@@ -89,6 +94,11 @@ public class XLoyaltyFormBuilder
         };
         form.Controls.Add(elonFrowningPictureBox);
         elonFrowningPictureBox.Visible = false;
+        // When the username text box is selected, hide picture box
+        usernameTextBox.Click += (sender, e) =>
+        {
+            elonFrowningPictureBox.Visible = false;
+        };
         return this;
     }
 
@@ -105,9 +115,15 @@ public class XLoyaltyFormBuilder
         };
         form.Controls.Add(elonGoFYourselfPictureBox);
         elonGoFYourselfPictureBox.Visible = false;
+        // When the username text box is selected, hide the picture box
+        usernameTextBox.Click += (sender, e) =>
+        {
+            // Just hide the elon images
+            elonGoFYourselfPictureBox.Visible = false;
+        };
         return this;
     }
-    
+
     public Form GetForm()
     {
         return this.form;
