@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Xaml.Permissions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -102,19 +103,11 @@ static async Task<string> TestEndpoint(string xUsername)
 var host = builder.Build();
 // Start the host in the background
 var hostTask = host.RunAsync();
-// Create XLoyalty Gui
-Application.EnableVisualStyles();
-Application.SetCompatibleTextRenderingDefault(false);
-// Create the form
-var form = new Form
-{
-    Text = "X LOYALTY",
-    MaximizeBox = false,
-    MinimizeBox = false,
-    FormBorderStyle = FormBorderStyle.FixedSingle,
-    BackColor = System.Drawing.Color.Black,
-    Size = new System.Drawing.Size(420, 420)
-};
+
+
+// Create the form builder
+XLoyaltyFormBuilder form = new XLoyaltyFormBuilder("X LOYALTY", new Size(420, 420));
+ 
 // Create the label
 var label = new Label
 {
@@ -126,7 +119,7 @@ var label = new Label
     TextAlign = ContentAlignment.TopCenter
 };
 // Add the label to the form
-form.Controls.Add(label);
+form.GetForm().Controls.Add(label);
 // Add the textfield to the form
 var usernameTextBox = new TextBox
 {
@@ -138,7 +131,7 @@ var usernameTextBox = new TextBox
     TextAlign = HorizontalAlignment.Center
 };
 // Add the textbox to the form
-form.Controls.Add(usernameTextBox);
+form.GetForm().Controls.Add(usernameTextBox);
 // Add a button to submit username and to try again
 var submitTryAgainButton = new Button
 {
@@ -157,7 +150,7 @@ var elonSmilingImage = new PictureBox
     Size = new Size(420, 200),
     SizeMode = PictureBoxSizeMode.Zoom,
 };
-form.Controls.Add(elonSmilingImage);
+form.GetForm().Controls.Add(elonSmilingImage);
 elonSmilingImage.Visible = false;
 // Create elon frowning to show the user when the username is non existant
 var elonFrowningImage = new PictureBox
@@ -167,7 +160,7 @@ var elonFrowningImage = new PictureBox
     Size = new Size(420, 200),
     SizeMode = PictureBoxSizeMode.Zoom,
 };
-form.Controls.Add(elonFrowningImage);
+form.GetForm().Controls.Add(elonFrowningImage);
 elonFrowningImage.Visible = false;
 // Create elon saying go fuck yourself image for too many requests
 var elonFYourselfImage = new PictureBox
@@ -177,7 +170,7 @@ var elonFYourselfImage = new PictureBox
     Size = new Size(420, 200),
     SizeMode = PictureBoxSizeMode.Zoom,
 };
-form.Controls.Add(elonFYourselfImage);
+form.GetForm().Controls.Add(elonFYourselfImage);
 elonFYourselfImage.Visible = false;
 // When the username textbox is selected it hides the images
 usernameTextBox.Click += async (sender, e) =>
@@ -192,6 +185,10 @@ submitTryAgainButton.Click += async (sender, e) =>
 {
     // Disable the button right away to not lodge the pipeline
     submitTryAgainButton.Enabled = false;
+    // Just hide the elon images
+    elonFrowningImage.Visible = false;
+    elonSmilingImage.Visible = false;
+    elonFYourselfImage.Visible = false;
     try
     {
         // X usernames are only supposed to be alphanumeric
@@ -243,8 +240,8 @@ submitTryAgainButton.Click += async (sender, e) =>
     submitTryAgainButton.Enabled = true;
 };
 // Add the button to the form
-form.Controls.Add(submitTryAgainButton);
+form.GetForm().Controls.Add(submitTryAgainButton);
 // Kill the host when you kill the form
-form.FormClosed += async (sender, e) => await host.StopAsync();
+form.GetForm().FormClosed += async (sender, e) => await host.StopAsync();
 // Run the form
-Application.Run(form);
+Application.Run(form.GetForm());
