@@ -130,7 +130,7 @@ public class XLoyaltyFormBuilder
 
 
     // Add a button to submit username and to try again
-    public XLoyaltyFormBuilder AddSubmitTryAgainButton(string text, Point location, Size size, Func<string, Task<string>> TestEndpoint, IHost? host)
+    public XLoyaltyFormBuilder AddSubmitTryAgainButton(string text, Point location, Size size, Func<string, Task<XLoyaltyResponseCode>> TestEndpoint, IHost? host)
     {
         // Create a submit try again button to submit a request to the x api for username search
         submitTryAgainButton = new Button
@@ -152,53 +152,43 @@ public class XLoyaltyFormBuilder
             elonFrowningPictureBox.Visible = false;
             elonSmilingPictureBox.Visible = false;
             elonGoFYourselfPictureBox.Visible = false;
-            try
+
+            // X usernames are only supposed to be alphanumeric
+            if (usernameTextBox.Text.All(char.IsLetterOrDigit))
             {
-                // X usernames are only supposed to be alphanumeric
-                if (usernameTextBox.Text.All(char.IsLetterOrDigit))
+                // Obtain response code
+                XLoyaltyResponseCode response = await TestEndpoint(usernameTextBox.Text);
+                switch (response)
                 {
-                    string response = await TestEndpoint(usernameTextBox.Text);
-                    // Something went wrong
-                    if (response == "error")
-                    {
-                        // Just flash the error for 5 seconds and quit
-                        introLabel.Text = "Something went wrong on our end!";
-                        Thread.Sleep(5000);
-                        Application.Exit();
-                    }
-                    // Username exists
-                    else if (response == "1")
-                    {
+                    // Show elon smiling
+                    case XLoyaltyResponseCode.UsernameExists:
                         elonFrowningPictureBox.Visible = false;
                         elonSmilingPictureBox.Visible = true;
                         elonGoFYourselfPictureBox.Visible = false;
-                    }
-                    // Username doesn't exist
-                    else if (response == "0")
-                    {
+                        break;
+                    // Elon frowning
+                    case XLoyaltyResponseCode.UsernameNonExistant:
                         elonFrowningPictureBox.Visible = true;
                         elonSmilingPictureBox.Visible = false;
                         elonGoFYourselfPictureBox.Visible = false;
-                    }
-                    else if (response == "-1")
-                    {
+                        break;
+                    // Elon telling you to go duck yourself
+                    case XLoyaltyResponseCode.RequestsLimited:
                         elonFrowningPictureBox.Visible = false;
                         elonSmilingPictureBox.Visible = false;
                         elonGoFYourselfPictureBox.Visible = true;
-
-                    }
-                }
-                else
-                {
-                    submitTryAgainButton.Text = "Try Again";
+                        break;
+                    // Something went horribly wrong through the pipeline
+                    case XLoyaltyResponseCode.Error:
+                        introLabel.Text = "Something went wrong on our end!";
+                        Thread.Sleep(5000);
+                        Application.Exit();
+                        break;
                 }
             }
-            catch (Exception ex)
+            else
             {
-                // Just flash the error for 5 seconds and quit
-                introLabel.Text = ex.Message;
-                Thread.Sleep(5000);
-                Application.Exit();
+                submitTryAgainButton.Text = "Try Again";
             }
             submitTryAgainButton.Enabled = true;
         };
@@ -213,11 +203,8 @@ public class XLoyaltyFormBuilder
         return this;
     }
 
-
     public Form GetForm()
     {
         return this.form;
     }
-
-
 }

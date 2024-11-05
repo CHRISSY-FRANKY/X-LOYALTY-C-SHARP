@@ -1,5 +1,4 @@
 using System.Text.Json;
-using System.Xaml.Permissions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -46,26 +45,24 @@ var builder = Host.CreateDefaultBuilder(args).ConfigureWebHostDefaults(webBuilde
                     string responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
                     // Parse the response body into a json
                     var jsonDocument = JsonDocument.Parse(responseBody);
-                    Console.Write("BODYYYY");
-                    Console.Write(responseBody);
                     JsonElement rootJsonElement = jsonDocument.RootElement;
                     // Too many requests
                     if (rootJsonElement.TryGetProperty("title", out var property))
                     {
                             Console.WriteLine(property.ToString());
-                            return Results.Ok(-1);
+                            return Results.Ok(XLoyaltyResponseCode.RequestsLimited);
                 
                     }
                     // Username exists
                     else if (rootJsonElement.TryGetProperty("data", out var prop))
                     {
-                        return Results.Ok(1);
+                        return Results.Ok(XLoyaltyResponseCode.UsernameExists);
                     }
                     // Username doesn't exist
                     else
                     {
 
-                        return Results.Ok(0);
+                        return Results.Ok(XLoyaltyResponseCode.UsernameNonExistant);
                     }
                 }
                 catch (HttpRequestException)
@@ -73,29 +70,29 @@ var builder = Host.CreateDefaultBuilder(args).ConfigureWebHostDefaults(webBuilde
                     // Something went horribly wrong on our end
                     return Results.BadRequest();
                 }
-            }).WithName("GetLists");
+            }).WithName("VerifyUsername");
         });
     });
 });
 // Setup method that tests endpoint to determine if a user exists
-static async Task<string> VerifyUsername(string xUsername)
+static async Task<XLoyaltyResponseCode> VerifyUsername(string xUsername)
 {
     // Create local http client
     var client = new HttpClient();
-    // Get a request from a response sent
+    // Get a request from a response sent and Dispose client
     var response = await client.GetAsync($"http://localhost:5115/VerifyUsername?username={xUsername}");
+    client.Dispose();
     // Respond based on the response
     if (response.IsSuccessStatusCode)
     {
-        string responseCode = await response.Content.ReadAsStringAsync();
+        string responseString = await response.Content.ReadAsStringAsync();
+        XLoyaltyResponseCode responseCode = (XLoyaltyResponseCode)sbyte.Parse(responseString);
         return responseCode;
     }
     // Bad request
     else
     {
-        Console.WriteLine("Something went wrong!");
-        client.Dispose();
-        return "error";
+        return XLoyaltyResponseCode.Error;
     }
 }
 // Build the custom host builder
@@ -104,11 +101,11 @@ var host = builder.Build();
 var hostTask = host.RunAsync();
 
 // Custom intro label text
-string introLabelText = "\nWelcome to X LOYALTY!\nEnter an X account username (alphanumeric) to determine if it exists or not!";
+string introLabelText = "\nWelcome to X LOYALTY!\nEnter an X account username (alphanumeric)\n to determine if it exists or not!";
 // Create the form builder to build the x loyalty form
 XLoyaltyFormBuilder form = new XLoyaltyFormBuilder("X LOYALTY", new Size(420, 420))
 .AddIntroLabel(introLabelText, new Point(0, 0), new Size(420, 60))
-.AddUsernameTextBox("Enter Username Here!", new Point(105, 60), new Size(210, 180))
+.AddUsernameTextBox("Enter Username Here!", new Point(105, 75), new Size(210, 180))
 .AddElonSmilingPictureBox("elonSmiling.jpg", new Point(0, 180), new Size(420, 200))
 .AddElonFrowningPictureBox("elonFrowning.jpeg", new Point(0, 180), new Size(420, 200))
 .AddElonGoFYourselfPictureBox("elonFYourself.jpg", new Point(0, 180), new Size(420, 200))
