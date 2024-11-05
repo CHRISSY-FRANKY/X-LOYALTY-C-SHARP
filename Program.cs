@@ -78,7 +78,7 @@ var builder = Host.CreateDefaultBuilder(args).ConfigureWebHostDefaults(webBuilde
     });
 });
 // Setup method that tests endpoint to determine if a user exists
-static async Task<string> TestEndpoint(string xUsername)
+static async Task<string> VerifyUsername(string xUsername)
 {
     // Create local http client
     var client = new HttpClient();
@@ -112,5 +112,5 @@ XLoyaltyFormBuilder form = new XLoyaltyFormBuilder("X LOYALTY", new Size(420, 42
 .AddElonSmilingPictureBox("elonSmiling.jpg", new Point(0, 180), new Size(420, 200))
 .AddElonFrowningPictureBox("elonFrowning.jpeg", new Point(0, 180), new Size(420, 200))
 .AddElonGoFYourselfPictureBox("elonFYourself.jpg", new Point(0, 180), new Size(420, 200))
-.AddSubmitTryAgainButton("Go", new Point(180, 120), new Size(60, 30), TestEndpoint, host)
+.AddSubmitTryAgainButton("Go", new Point(180, 120), new Size(60, 30), VerifyUsername, host)
 .Run();
