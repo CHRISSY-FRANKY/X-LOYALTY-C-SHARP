@@ -109,20 +109,9 @@ string introLabelText = "\nWelcome to X LOYALTY!\nEnter an X account username (a
 
 // Create the form builder
 XLoyaltyFormBuilder form = new XLoyaltyFormBuilder("X LOYALTY", new Size(420, 420))
-.AddIntroLabel(introLabelText, new System.Drawing.Point(0, 0), new System.Drawing.Size(420, 60));
+.AddIntroLabel(introLabelText, new Point(0, 0), new Size(420, 60))
+.AddUsernameTextBox("Enter Username Here!", new Point(105, 60), new Size(210, 180));
 
-// Add the textfield to the form
-var usernameTextBox = new TextBox
-{
-    Text = "Enter Username Here!",
-    Location = new System.Drawing.Point(105, 60),
-    Size = new System.Drawing.Size(210, 180),
-    BackColor = System.Drawing.Color.White,
-    ForeColor = System.Drawing.Color.Black,
-    TextAlign = HorizontalAlignment.Center
-};
-// Add the textbox to the form
-form.GetForm().Controls.Add(usernameTextBox);
 // Add a button to submit username and to try again
 var submitTryAgainButton = new Button
 {

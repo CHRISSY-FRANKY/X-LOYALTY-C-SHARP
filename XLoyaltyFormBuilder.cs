@@ -3,7 +3,7 @@ public class XLoyaltyFormBuilder
 {
     private Form form;
 
-    public XLoyaltyFormBuilder(string text, System.Drawing.Size formSize)
+    public XLoyaltyFormBuilder(string text, Size formSize)
     {
         // Set application settings
         Application.EnableVisualStyles();
@@ -15,28 +15,43 @@ public class XLoyaltyFormBuilder
             MaximizeBox = false,
             MinimizeBox = false,
             FormBorderStyle = FormBorderStyle.FixedSingle,
-            BackColor = System.Drawing.Color.Black,
+            BackColor = Color.Black,
             Size = formSize
         };
     }
 
-    public XLoyaltyFormBuilder AddIntroLabel(string text, System.Drawing.Point location, System.Drawing.Size size)
+    public XLoyaltyFormBuilder AddIntroLabel(string text, Point location, Size size)
     {
         // Create the label
-        Label label = new Label
+        Label label = new()
         {
             Text = text,
             Location = location,
             Size = size,
-            BackColor = System.Drawing.Color.Black,
-            ForeColor = System.Drawing.Color.White,
+            BackColor = Color.Black,
+            ForeColor = Color.White,
             TextAlign = ContentAlignment.TopCenter
         };
         form.Controls.Add(label);
         return this;
     }
 
-
+    public XLoyaltyFormBuilder AddUsernameTextBox(string text, Point location, Size size)
+    {
+        // Add the text box to the form
+        TextBox usernameTextBox = new()
+        {
+            Text = text,
+            Location = location,
+            Size = size,
+            BackColor = Color.White,
+            ForeColor = Color.Black,
+            TextAlign = HorizontalAlignment.Center
+        };
+        // Add the textbox to the form
+        form.Controls.Add(usernameTextBox);
+        return this;
+    }
 
     public Form GetForm()
     {
