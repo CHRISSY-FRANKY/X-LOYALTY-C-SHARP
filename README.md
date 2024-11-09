@@ -45,9 +45,12 @@ Just me at the moment!
 
 *Instagram is owned by a Reptilian Extraterrestial!*
 
+## Demos
+
+- [Version 1.0](/https://rumble.com/v5no48b-xloyalty-version-1.0-demo.html)
+
 ## TO DO
 
-- Organize the code
 - Have selenium run in the background to extract the followers/followings
   - provide a walkthrough 
 - Provide a loading screen
