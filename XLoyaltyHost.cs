@@ -7,9 +7,11 @@ using Microsoft.Extensions.Hosting;
 
 public class XLoyaltyHost
 {
+    private IHostBuilder hostBuilder;
+    private IHost builtHost;
     public XLoyaltyHost(string[] args, ushort port, string keysFile)
     {
-        IHostBuilder hostBuilder = Host.CreateDefaultBuilder(args)
+        hostBuilder = Host.CreateDefaultBuilder(args)
         .ConfigureWebHostDefaults(webBuilder =>
         {
             ConfigureUrls(webBuilder, port);
@@ -101,4 +103,21 @@ public class XLoyaltyHost
         });
     }
 
+    public XLoyaltyHost BuildHost()
+    {
+        builtHost = hostBuilder.Build();
+        return this;
+    }
+
+    public XLoyaltyHost RunHost()
+    {
+        builtHost.RunAsync();
+        return this;
+
+    }
+
+    public IHost GetHost()
+    {
+        return this.builtHost;
+    }
 }
