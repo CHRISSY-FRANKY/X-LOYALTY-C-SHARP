@@ -1,6 +1,5 @@
 // Create XLoyaltyHost
 XLoyaltyHost xLoyaltyHost = new XLoyaltyHost(args, 5115, "secrets.json").BuildHost().RunHost();
-
 // Setup method that tests endpoint to determine if a user exists
 static async Task<XLoyaltyResponseCode> VerifyUsername(string xUsername)
 {
@@ -22,7 +21,6 @@ static async Task<XLoyaltyResponseCode> VerifyUsername(string xUsername)
         return XLoyaltyResponseCode.Error;
     }
 }
-
 // Custom intro label text
 string introLabelText = "\nWelcome to X LOYALTY!\nEnter an X account username (alphanumeric)\n to determine if it exists or not!";
 // Create the form builder to build the x loyalty form
