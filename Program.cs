@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+
 // Create and configure the host builder
 var builder = Host.CreateDefaultBuilder(args).ConfigureWebHostDefaults(webBuilder =>
 {
@@ -49,7 +50,7 @@ var builder = Host.CreateDefaultBuilder(args).ConfigureWebHostDefaults(webBuilde
                     // Too many requests
                     if (rootJsonElement.TryGetProperty("title", out var property))
                     {
-                            Console.WriteLine(property.ToString());
+                            //Console.WriteLine(property.ToString());
                             return Results.Ok(XLoyaltyResponseCode.RequestsLimited);
                 
                     }
@@ -99,6 +100,9 @@ static async Task<XLoyaltyResponseCode> VerifyUsername(string xUsername)
 var host = builder.Build();
 // Start the host in the background
 var hostTask = host.RunAsync();
+
+
+
 
 // Custom intro label text
 string introLabelText = "\nWelcome to X LOYALTY!\nEnter an X account username (alphanumeric)\n to determine if it exists or not!";
