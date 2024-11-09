@@ -1,5 +1,4 @@
 // X Loyalty Form Builder Class to improve readability
-using System.ComponentModel;
 using Microsoft.Extensions.Hosting;
 
 public class XLoyaltyFormBuilder
