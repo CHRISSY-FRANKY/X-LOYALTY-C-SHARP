@@ -11,7 +11,7 @@ public class XLoyaltyFormBuilder
     private PictureBox elonGoFYourselfPictureBox;
     private Button submitTryAgainButton;
 
-    public XLoyaltyFormBuilder(string text, Size formSize)
+    public XLoyaltyFormBuilder(Size formSize)
     {
         // Set application settings
         Application.EnableVisualStyles();
@@ -19,7 +19,7 @@ public class XLoyaltyFormBuilder
         // Create form based on arguments provided
         form = new Form
         {
-            Text = text,
+            Text = "X LOYALTY",
             MaximizeBox = false,
             MinimizeBox = false,
             FormBorderStyle = FormBorderStyle.FixedSingle,
@@ -29,12 +29,12 @@ public class XLoyaltyFormBuilder
     }
 
     // Adds Intro Label to Form
-    public XLoyaltyFormBuilder AddIntroLabel(string text, Point location, Size size)
+    public XLoyaltyFormBuilder AddIntroLabel(Point location, Size size)
     {
         // Create the label
         introLabel = new()
         {
-            Text = text,
+            Text = "\nWelcome to X LOYALTY!\nEnter an X account username (alphanumeric)\nto determine if it exists or not!",
             Location = location,
             Size = size,
             BackColor = Color.Black,
@@ -46,12 +46,12 @@ public class XLoyaltyFormBuilder
     }
 
     // Adds Username to TextBox
-    public XLoyaltyFormBuilder AddUsernameTextBox(string text, Point location, Size size)
+    public XLoyaltyFormBuilder AddUsernameTextBox(Point location, Size size)
     {
         // Add the text box to the form
         usernameTextBox = new()
         {
-            Text = text,
+            Text = "Enter Username Here!",
             Location = location,
             Size = size,
             BackColor = Color.White,
@@ -129,12 +129,12 @@ public class XLoyaltyFormBuilder
 
 
     // Add a button to submit username and to try again
-    public XLoyaltyFormBuilder AddSubmitTryAgainButton(string text, Point location, Size size, Func<string, Task<XLoyaltyResponseCode>> TestEndpoint, IHost? host)
+    public XLoyaltyFormBuilder AddSubmitTryAgainButton(Point location, Size size, Func<string, Task<XLoyaltyResponseCode>> VerifyUsername, IHost? host)
     {
         // Create a submit try again button to submit a request to the x api for username search
         submitTryAgainButton = new Button
         {
-            Text = text,
+            Text = "Go",
             Location = location,
             Size = size,
             BackColor = Color.White,
@@ -156,7 +156,7 @@ public class XLoyaltyFormBuilder
             if (usernameTextBox.Text.All(char.IsLetterOrDigit))
             {
                 // Obtain response code
-                XLoyaltyResponseCode response = await TestEndpoint(usernameTextBox.Text);
+                XLoyaltyResponseCode response = await VerifyUsername(usernameTextBox.Text);
                 switch (response)
                 {
                     // Show elon smiling
@@ -164,6 +164,7 @@ public class XLoyaltyFormBuilder
                         elonFrowningPictureBox.Visible = false;
                         elonSmilingPictureBox.Visible = true;
                         elonGoFYourselfPictureBox.Visible = false;
+                        introLabel.Text = "\nWelcome to X LOYALTY!\nRedirecting you to x.com!\nPlease sign in within the next 30 seconds.";
                         break;
                     // Elon frowning
                     case XLoyaltyResponseCode.UsernameNonExistant:
