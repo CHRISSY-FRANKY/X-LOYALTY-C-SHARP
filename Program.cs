@@ -5,17 +5,14 @@ public class Program
         // Create XLoyaltyHost
         XLoyaltyHost xLoyaltyHost = new XLoyaltyHost(args, 5115, "secrets.json").BuildHost().RunHost();
 
-        // Custom intro label text
-        string introLabelText = "\nWelcome to X LOYALTY!\nEnter an X account username (alphanumeric)\nto determine if it exists or not!";
-
         // Create the form builder to build the x loyalty form
-        XLoyaltyFormBuilder form = new XLoyaltyFormBuilder("X LOYALTY", new Size(420, 420))
-            .AddIntroLabel(introLabelText, new Point(0, 0), new Size(420, 60))
-            .AddUsernameTextBox("Enter Username Here!", new Point(105, 75), new Size(210, 180))
+        XLoyaltyFormBuilder form = new XLoyaltyFormBuilder(new Size(420, 420))
+            .AddIntroLabel(new Point(0, 0), new Size(420, 60))
+            .AddUsernameTextBox(new Point(105, 75), new Size(210, 180))
             .AddElonSmilingPictureBox("elonSmiling.jpg", new Point(0, 180), new Size(420, 200))
             .AddElonFrowningPictureBox("elonFrowning.jpeg", new Point(0, 180), new Size(420, 200))
             .AddElonGoFYourselfPictureBox("elonFYourself.jpg", new Point(0, 180), new Size(420, 200))
-            .AddSubmitTryAgainButton("Go", new Point(180, 120), new Size(60, 30), VerifyUsername, xLoyaltyHost.GetHost())
+            .AddSubmitTryAgainButton(new Point(180, 120), new Size(60, 30), VerifyUsername, xLoyaltyHost.GetHost())
             .Run();
     }
 
