@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
@@ -52,55 +53,81 @@ public class XLoyaltyHost
             // Add endpoints
             app.UseEndpoints(endpoints =>
             {
-                // Define Get Lists of Followers and Following
-                endpoints.MapGet("/VerifyUsername", async (string username, IConfiguration configuration, HttpResponse response) =>
-                {
-                    try
-                    {
-                        // Setup http client
-                        using var httpClient = new HttpClient();
-                        // Save the bearer token
-                        string bearerToken = configuration["BearerToken"];
-                        // Add the authorization header
-                        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
-                        // Build the url to request the existence of the username provided
-                        string url = $"https://api.twitter.com/2/users/by/username/{username}";
-                        //Console.WriteLine(bearerToken); Checking configuration settings
-                        //Console.WriteLine(url); Checking ur
-                        // Make the custom request
-                        HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(url);
-                        // Get the response body
-                        string responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
-                        // Parse the response body into a json
-                        var jsonDocument = JsonDocument.Parse(responseBody);
-                        JsonElement rootJsonElement = jsonDocument.RootElement;
-                        // Too many requests
-                        if (rootJsonElement.TryGetProperty("title", out var property))
-                        {
-                            //Console.WriteLine(property.ToString());
-                            return Results.Ok(XLoyaltyResponseCode.RequestsLimited);
-
-                        }
-                        // Username exists
-                        else if (rootJsonElement.TryGetProperty("data", out var prop))
-                        {
-                            return Results.Ok(XLoyaltyResponseCode.UsernameExists);
-                        }
-                        // Username doesn't exist
-                        else
-                        {
-
-                            return Results.Ok(XLoyaltyResponseCode.UsernameNonExistant);
-                        }
-                    }
-                    catch (HttpRequestException)
-                    {
-                        // Something went horribly wrong on our end
-                        return Results.BadRequest();
-                    }
-                }).WithName("VerifyUsername");
+                ConfigureVerifyUsernameEndpoint(endpoints);
+                ConfigureGetFollowingFollowersLists(endpoints);
             });
         });
+    }
+
+    private static void ConfigureGetFollowingFollowersLists(IEndpointRouteBuilder endpoints)
+    {
+        endpoints.MapGet("/FollowingFollowersLists", async (string username, IConfiguration configuration, HttpResponse response) =>
+        {
+            try
+            {
+                // Load x.com
+                // Wait for the user to sign in
+                // Go to their followers/following
+                // Pull the followers and followings list
+                // Return dictionary of two arrays
+            }
+            catch (HttpRequestException)
+            {
+                // Something went horribly wrong on our end
+                return Results.BadRequest();
+            }
+        }).WithName("FollowingFollowersLists");
+    }
+
+    private static void ConfigureVerifyUsernameEndpoint(IEndpointRouteBuilder endpoints)
+    {
+        // Verify Username Endpoint
+        endpoints.MapGet("/VerifyUsername", async (string username, IConfiguration configuration, HttpResponse response) =>
+        {
+            try
+            {
+                // Setup http client
+                using var httpClient = new HttpClient();
+                // Save the bearer token
+                string bearerToken = configuration["BearerToken"];
+                // Add the authorization header
+                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
+                // Build the url to request the existence of the username provided
+                string url = $"https://api.twitter.com/2/users/by/username/{username}";
+                //Console.WriteLine(bearerToken); Checking configuration settings
+                //Console.WriteLine(url); Checking ur
+                // Make the custom request
+                HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(url);
+                // Get the response body
+                string responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
+                // Parse the response body into a json
+                var jsonDocument = JsonDocument.Parse(responseBody);
+                JsonElement rootJsonElement = jsonDocument.RootElement;
+                // Too many requests
+                if (rootJsonElement.TryGetProperty("title", out var property))
+                {
+                    //Console.WriteLine(property.ToString());
+                    return Results.Ok(XLoyaltyResponseCode.RequestsLimited);
+
+                }
+                // Username exists
+                else if (rootJsonElement.TryGetProperty("data", out var prop))
+                {
+                    return Results.Ok(XLoyaltyResponseCode.UsernameExists);
+                }
+                // Username doesn't exist
+                else
+                {
+
+                    return Results.Ok(XLoyaltyResponseCode.UsernameNonExistant);
+                }
+            }
+            catch (HttpRequestException)
+            {
+                // Something went horribly wrong on our end
+                return Results.BadRequest();
+            }
+        }).WithName("VerifyUsername");
     }
 
     public XLoyaltyHost BuildHost()
