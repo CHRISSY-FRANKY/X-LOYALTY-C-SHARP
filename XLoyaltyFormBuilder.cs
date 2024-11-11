@@ -1,5 +1,6 @@
 // X Loyalty Form Builder Class to improve readability
 using Microsoft.Extensions.Hosting;
+using OpenQA.Selenium;
 
 public class XLoyaltyFormBuilder
 {
@@ -127,9 +128,94 @@ public class XLoyaltyFormBuilder
         return this;
     }
 
+    // Returns whether or not to proceed to the next action after the username has been verified
+    private void UpdateElonMuskVisibility(XLoyaltyResponseCode response)
+    {
+        switch (response)
+        {
+            // Show elon smiling
+            case XLoyaltyResponseCode.UsernameExists:
+                elonFrowningPictureBox.Visible = false;
+                elonSmilingPictureBox.Visible = true;
+                elonGoFYourselfPictureBox.Visible = false;
+                introLabel.Text = "\nWelcome to X LOYALTY!\nRedirecting you to x.com!\nPlease sign in within the next 30 seconds.";
+                break;
+            // Elon frowning
+            case XLoyaltyResponseCode.UsernameNonExistant:
+                elonFrowningPictureBox.Visible = true;
+                elonSmilingPictureBox.Visible = false;
+                elonGoFYourselfPictureBox.Visible = false;
+                break;
+            // Elon telling you to go duck yourself
+            case XLoyaltyResponseCode.RequestsLimited:
+                elonFrowningPictureBox.Visible = false;
+                elonSmilingPictureBox.Visible = false;
+                elonGoFYourselfPictureBox.Visible = true;
+                break;
+            // Something went horribly wrong through the pipeline
+            case XLoyaltyResponseCode.Error:
+                introLabel.Text = "Something went wrong on our end!";
+                Thread.Sleep(5000);
+                Application.Exit();
+                break;
+        }
+    }
+
+    private async void UpdateFollowingFollowersListsAsync(string XUsername)
+    {
+        // Username exists, get lists of following and followers
+        string followingFollowersLists = await GetFollowingFollowersLists(XUsername);
+        Console.WriteLine(followingFollowersLists);
+        // otherwise nothing you can do but create an x account
+    }
+
+    private static async Task<string> GetFollowingFollowersLists(string xUsername)
+    {
+        // Create local http client
+        using (var client = new HttpClient())
+        {
+            // Get a response from the request sent
+            var response = await client.GetAsync($"http://localhost:5115/FollowingFollowersLists?username={xUsername}");
+            // Response based on the response
+            if (response.IsSuccessStatusCode)
+            {
+                string responseString = await response.Content.ReadAsStringAsync();
+                return responseString;
+            }
+            else
+            {
+                return "error";
+            }
+        }
+        
+    }
+
+    // Setup method that tests endpoint to determine if a user exists
+    private static async Task<XLoyaltyResponseCode> VerifyUsername(string xUsername)
+    {
+        // Create local http client
+        using (var client = new HttpClient()) // Using HttpClientFactory or IHttpClientFactory would be more appropriate for production
+        {
+            // Get a response from a request sent
+            var response = await client.GetAsync($"http://localhost:5115/VerifyUsername?username={xUsername}");
+
+            // Respond based on the response
+            if (response.IsSuccessStatusCode)
+            {
+                string responseString = await response.Content.ReadAsStringAsync();
+                XLoyaltyResponseCode responseCode = (XLoyaltyResponseCode)sbyte.Parse(responseString);
+                return responseCode;
+            }
+            // Bad request
+            else
+            {
+                return XLoyaltyResponseCode.Error;
+            }
+        }
+    }
 
     // Add a button to submit username and to try again
-    public XLoyaltyFormBuilder AddSubmitTryAgainButton(Point location, Size size, Func<string, Task<XLoyaltyResponseCode>> VerifyUsername, IHost? host)
+    public XLoyaltyFormBuilder AddSubmitTryAgainButton(Point location, Size size, IHost? host)
     {
         // Create a submit try again button to submit a request to the x api for username search
         submitTryAgainButton = new Button
@@ -157,34 +243,12 @@ public class XLoyaltyFormBuilder
             {
                 // Obtain response code
                 XLoyaltyResponseCode response = await VerifyUsername(usernameTextBox.Text);
-                switch (response)
+                UpdateElonMuskVisibility(response);
+                // Username exists, meaning we can access a following and followers list
+                if (response == XLoyaltyResponseCode.UsernameExists)
                 {
-                    // Show elon smiling
-                    case XLoyaltyResponseCode.UsernameExists:
-                        elonFrowningPictureBox.Visible = false;
-                        elonSmilingPictureBox.Visible = true;
-                        elonGoFYourselfPictureBox.Visible = false;
-                        introLabel.Text = "\nWelcome to X LOYALTY!\nRedirecting you to x.com!\nPlease sign in within the next 30 seconds.";
-                        break;
-                    // Elon frowning
-                    case XLoyaltyResponseCode.UsernameNonExistant:
-                        elonFrowningPictureBox.Visible = true;
-                        elonSmilingPictureBox.Visible = false;
-                        elonGoFYourselfPictureBox.Visible = false;
-                        break;
-                    // Elon telling you to go duck yourself
-                    case XLoyaltyResponseCode.RequestsLimited:
-                        elonFrowningPictureBox.Visible = false;
-                        elonSmilingPictureBox.Visible = false;
-                        elonGoFYourselfPictureBox.Visible = true;
-                        break;
-                    // Something went horribly wrong through the pipeline
-                    case XLoyaltyResponseCode.Error:
-                        introLabel.Text = "Something went wrong on our end!";
-                        Thread.Sleep(5000);
-                        Application.Exit();
-                        break;
-                }
+                    UpdateFollowingFollowersListsAsync(usernameTextBox.Text);
+                }   
             }
             else
             {
