@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
 
 public class XLoyaltyHost
 {
@@ -63,13 +65,31 @@ public class XLoyaltyHost
     {
         endpoints.MapGet("/FollowingFollowersLists", async (string username, IConfiguration configuration, HttpResponse response) =>
         {
+            // Get the Chrome driver because Google's tentacles are everywhere
+            IWebDriver webDriver = new ChromeDriver();
+            // Create random number to mimic human delay
+            Random randomDelay = new Random();
             try
             {
                 // Load x.com
-                // Wait for the user to sign in
-                // Go to their followers/following
-                // Pull the followers and followings list
-                // Return dictionary of two arrays
+                webDriver.Manage().Window.Maximize(); // Maximize the browser for a better experience
+                webDriver.Navigate().GoToUrl($"https://x.com/{username}"); // Navigate to x.com for the user to sign in
+                bool loggingIn = false; // Keep track of the user logging in
+                while (true)
+                {
+                    if (webDriver.Url == $"https://x.com/i/flow/login?redirect_after_login=%2F{username}" && !loggingIn)
+                    {
+                        //Console.WriteLine("User is logging in!");
+                        loggingIn = true;
+                    } 
+                    else if (webDriver.Url != $"x.com/{username}" && loggingIn)
+                    {
+                        //Console.WriteLine("User has logged in!");
+                        break;
+                    }
+                    Thread.Sleep(1000); // check every 1 second
+                }
+                return Results.Ok("test test test");
             }
             catch (HttpRequestException)
             {
