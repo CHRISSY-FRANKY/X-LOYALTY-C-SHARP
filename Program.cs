@@ -12,31 +12,9 @@ public class Program
             .AddElonSmilingPictureBox("elonSmiling.jpg", new Point(0, 180), new Size(420, 200))
             .AddElonFrowningPictureBox("elonFrowning.jpeg", new Point(0, 180), new Size(420, 200))
             .AddElonGoFYourselfPictureBox("elonFYourself.jpg", new Point(0, 180), new Size(420, 200))
-            .AddSubmitTryAgainButton(new Point(180, 120), new Size(60, 30), VerifyUsername, xLoyaltyHost.GetHost())
+            .AddSubmitTryAgainButton(new Point(180, 120), new Size(60, 30), xLoyaltyHost.GetHost())
             .Run();
     }
 
-    // Setup method that tests endpoint to determine if a user exists
-    public static async Task<XLoyaltyResponseCode> VerifyUsername(string xUsername)
-    {
-        // Create local http client
-        using (var client = new HttpClient()) // Using HttpClientFactory or IHttpClientFactory would be more appropriate for production
-        {
-            // Get a request from a response sent
-            var response = await client.GetAsync($"http://localhost:5115/VerifyUsername?username={xUsername}");
-
-            // Respond based on the response
-            if (response.IsSuccessStatusCode)
-            {
-                string responseString = await response.Content.ReadAsStringAsync();
-                XLoyaltyResponseCode responseCode = (XLoyaltyResponseCode)sbyte.Parse(responseString);
-                return responseCode;
-            }
-            // Bad request
-            else
-            {
-                return XLoyaltyResponseCode.Error;
-            }
-        }
-    }
+    
 }
