@@ -65,36 +65,62 @@ public class XLoyaltyHost
     {
         endpoints.MapGet("/FollowingFollowersLists", async (string username, IConfiguration configuration, HttpResponse response) =>
         {
-            // Get the Chrome driver because Google's tentacles are everywhere
-            IWebDriver webDriver = new ChromeDriver();
-            // Create random number to mimic human delay
-            Random randomDelay = new Random();
+            IWebDriver webDriver = new ChromeDriver(); // Google's tentacles are everywhere
+            Random randomDelay = new Random(); // Help mimic human delay
             try
             {
-                // Load x.com
                 webDriver.Manage().Window.Maximize(); // Maximize the browser for a better experience
-                webDriver.Navigate().GoToUrl($"https://x.com/{username}"); // Navigate to x.com for the user to sign in
+                webDriver.Navigate().GoToUrl($"https://x.com/i/flow/login?redirect_after_login=%2F{username}"); // Have the user sign in
                 bool loggingIn = false; // Keep track of the user logging in
                 while (true)
                 {
                     if (webDriver.Url == $"https://x.com/i/flow/login?redirect_after_login=%2F{username}" && !loggingIn)
                     {
-                        //Console.WriteLine("User is logging in!");
-                        loggingIn = true;
-                    } 
-                    else if (webDriver.Url != $"x.com/{username}" && loggingIn)
+                        Console.WriteLine("User is trying to sign in!");
+                        
+                    }
+                    else if (webDriver.Url != $"https://x.com/{username}" && !loggingIn)
                     {
-                        //Console.WriteLine("User has logged in!");
+                        Console.WriteLine("User has signed in!");
+                        loggingIn = true;
+                    }
+                    else if (loggingIn)
+                    {
+                        Console.WriteLine("User is signed in!");
                         break;
                     }
                     Thread.Sleep(1000); // check every 1 second
+                }
+                // Navigate to the followers website
+                webDriver.Navigate().GoToUrl($"https://x.com/{username}/followers");
+                int userDelay = randomDelay.Next(2000, 3000); // Allow the page to load / mimic delay
+                Thread.Sleep(userDelay);
+                Console.WriteLine("Followers:"); // Print the usernames of each follower
+                foreach (IWebElement element in webDriver.FindElements(By.CssSelector(".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3")))
+                {
+                    string text = element.Text;
+                    if (text.Contains("@") && text.StartsWith("@"))
+                    {
+                        Console.WriteLine(text);
+                    }
+                }
+                webDriver.Navigate().GoToUrl($"https://twitter.com/{username}/following"); // Click on the "Following" tab
+                userDelay = randomDelay.Next(2000, 3000); // Allow the page to load / mimic delay
+                Thread.Sleep(userDelay);
+                Console.WriteLine("Following:"); // Print the usernames of each following user
+                foreach (IWebElement element in webDriver.FindElements(By.CssSelector(".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3")))
+                {
+                    string text = element.Text;
+                    if (text.Contains("@") && text.StartsWith("@"))
+                    {
+                        Console.WriteLine(text);
+                    }
                 }
                 return Results.Ok("test test test");
             }
             catch (HttpRequestException)
             {
-                // Something went horribly wrong on our end
-                return Results.BadRequest();
+                return Results.BadRequest(); // Something went horribly wrong on our end
             }
         }).WithName("FollowingFollowersLists");
     }
