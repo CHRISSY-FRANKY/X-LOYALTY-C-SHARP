@@ -1,3 +1,4 @@
+using System.Security.Authentication;
 using System.Text.Json;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -71,22 +72,21 @@ public class XLoyaltyHost
             {
                 webDriver.Manage().Window.Maximize(); // Maximize the browser for a better experience
                 webDriver.Navigate().GoToUrl($"https://x.com/i/flow/login?redirect_after_login=%2F{username}"); // Have the user sign in
-                bool loggingIn = false; // Keep track of the user logging in
+                short signInStage = 0; // Keep track of the user logging in
                 while (true)
                 {
-                    if (webDriver.Url == $"https://x.com/i/flow/login?redirect_after_login=%2F{username}" && !loggingIn)
+                    if (webDriver.Url == $"https://x.com/i/flow/login?redirect_after_login=%2F{username}" && signInStage == 0)
                     {
-                        Console.WriteLine("User is trying to sign in!");
-                        
+                        Console.Write("USER IS TRYING TO SIGN IN!");
+                        signInStage = 1;
                     }
-                    else if (webDriver.Url != $"https://x.com/{username}" && !loggingIn)
+                    else if (webDriver.Url == $"https://x.com/{username}" && signInStage == 1)
                     {
-                        Console.WriteLine("User has signed in!");
-                        loggingIn = true;
+                        Console.Write("USER SIGNED IN!");
+                        signInStage = 2;
                     }
-                    else if (loggingIn)
+                    else if (signInStage == 2)
                     {
-                        Console.WriteLine("User is signed in!");
                         break;
                     }
                     Thread.Sleep(1000); // check every 1 second
