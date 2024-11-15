@@ -236,23 +236,17 @@ public class XLoyaltyFormBuilder
             {
                 // Obtain response code
                 XLoyaltyResponseCode response = await VerifyUsername(usernameTextBox.Text);
+                UpdateElonMuskVisibility(response);
                 // Username exists, meaning we can access a following and followers list
                 if (response == XLoyaltyResponseCode.UsernameExists)
                 {
-                    UpdateElonMuskVisibility(response);
                     // Disable form
                     form.Enabled = false;
-                    form.Opacity = 0.5;
                     // Username exists, get lists of following and followers
                     string followingFollowersLists = await GetFollowingFollowersLists(usernameTextBox.Text);
                     // Enable form
                     form.Enabled = true;
-                    form.Opacity = 1.0;
                     Console.WriteLine(followingFollowersLists);
-                }
-                else
-                {
-
                 }
             }
             else
