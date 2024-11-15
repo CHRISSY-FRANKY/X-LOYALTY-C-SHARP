@@ -208,6 +208,9 @@ public class XLoyaltyFormBuilder
     // Add a button to submit username and to try again
     public XLoyaltyFormBuilder AddSubmitTryAgainButton(Point location, Size size, IHost? host)
     {
+        this.form.FormClosing += (sender, e) => { // Dispose the host before closing the form
+            host.Dispose();
+        };
         // Create a submit try again button to submit a request to the x api for username search
         submitTryAgainButton = new Button
         {
