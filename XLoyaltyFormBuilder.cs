@@ -138,7 +138,6 @@ public class XLoyaltyFormBuilder
                 elonFrowningPictureBox.Visible = false;
                 elonSmilingPictureBox.Visible = true;
                 elonGoFYourselfPictureBox.Visible = false;
-                introLabel.Text = "\nWelcome to X LOYALTY!\nRedirecting you to x.com!\nPlease sign in within the next 30 seconds.";
                 break;
             // Elon frowning
             case XLoyaltyResponseCode.UsernameNonExistant:
@@ -161,15 +160,7 @@ public class XLoyaltyFormBuilder
         }
     }
 
-    private async void UpdateFollowingFollowersListsAsync(string XUsername)
-    {
-        // Username exists, get lists of following and followers
-        string followingFollowersLists = await GetFollowingFollowersLists(XUsername);
-        Console.WriteLine(followingFollowersLists);
-        // otherwise nothing you can do but create an x account
-    }
-
-    private static async Task<string> GetFollowingFollowersLists(string xUsername)
+    private async Task<string> GetFollowingFollowersLists(string xUsername)
     {
         // Create local http client
         using (var client = new HttpClient())
@@ -187,7 +178,7 @@ public class XLoyaltyFormBuilder
                 return "error";
             }
         }
-        
+
     }
 
     // Setup method that tests endpoint to determine if a user exists
@@ -237,18 +228,29 @@ public class XLoyaltyFormBuilder
             elonFrowningPictureBox.Visible = false;
             elonSmilingPictureBox.Visible = false;
             elonGoFYourselfPictureBox.Visible = false;
-
             // X usernames are only supposed to be alphanumeric
             if (usernameTextBox.Text.All(char.IsLetterOrDigit))
             {
                 // Obtain response code
                 XLoyaltyResponseCode response = await VerifyUsername(usernameTextBox.Text);
-                UpdateElonMuskVisibility(response);
                 // Username exists, meaning we can access a following and followers list
                 if (response == XLoyaltyResponseCode.UsernameExists)
                 {
-                    UpdateFollowingFollowersListsAsync(usernameTextBox.Text);
-                }   
+                    UpdateElonMuskVisibility(response);
+                    // Disable form
+                    form.Enabled = false;
+                    form.Opacity = 0.5;
+                    // Username exists, get lists of following and followers
+                    string followingFollowersLists = await GetFollowingFollowersLists(usernameTextBox.Text);
+                    // Enable form
+                    form.Enabled = true;
+                    form.Opacity = 1.0;
+                    Console.WriteLine(followingFollowersLists);
+                }
+                else
+                {
+
+                }
             }
             else
             {
