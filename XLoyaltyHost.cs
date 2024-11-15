@@ -67,54 +67,68 @@ public class XLoyaltyHost
         endpoints.MapGet("/FollowingFollowersLists", async (string username, IConfiguration configuration, HttpResponse response) =>
         {
             Thread.Sleep(3000);
-            IWebDriver webDriver = new ChromeDriver(); // Google's tentacles are everywhere
-            Random randomDelay = new Random(); // Help mimic human delay
             try
             {
+                IWebDriver webDriver = new ChromeDriver(); // Google's tentacles are everywhere
+                Random randomDelay = new Random(); // Help mimic human delay
+
                 webDriver.Manage().Window.Maximize(); // Maximize the browser for a better experience
                 webDriver.Navigate().GoToUrl($"https://x.com/i/flow/login?redirect_after_login=%2F{username}"); // Have the user sign in
-                short signInStage = 0; // Keep track of the user logging in
-                while (true)
+                byte signInStage = 0; // Keep track of the user logging in
+                try
                 {
-                    if (webDriver.Url == $"https://x.com/i/flow/login?redirect_after_login=%2F{username}" && signInStage == 0)
+
+                    while (true)
                     {
-                        //Console.Write("USER IS TRYING TO SIGN IN!");
-                        signInStage = 1;
+
+                        if (webDriver.Url == $"https://x.com/i/flow/login?redirect_after_login=%2F{username}" && signInStage == 0)
+                        {
+                            //Console.Write("USER IS TRYING TO SIGN IN!");
+                            signInStage = 1;
+                        }
+                        else if (webDriver.Url == $"https://x.com/{username}" && signInStage == 1)
+                        {
+                            //Console.Write("USER SIGNED IN!");
+                            signInStage = 2;
+                        }
+                        else if (signInStage == 2)
+                        {
+                            break;
+                        }
+                        Thread.Sleep(1000); // check every 1 second
                     }
-                    else if (webDriver.Url == $"https://x.com/{username}" && signInStage == 1)
+                    // Navigate to the followers website
+                    webDriver.Navigate().GoToUrl($"https://x.com/{username}/followers");
+                    int userDelay = randomDelay.Next(2000, 3000); // Allow the page to load / mimic delay
+                    Thread.Sleep(userDelay);
+                    Console.WriteLine("Followers:"); // Print the usernames of each follower
+                    foreach (IWebElement element in webDriver.FindElements(By.CssSelector(".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3")))
                     {
-                        //Console.Write("USER SIGNED IN!");
-                        signInStage = 2;
+                        string text = element.Text;
+                        if (text.Contains("@") && text.StartsWith("@"))
+                        {
+                            Console.WriteLine(text);
+                        }
                     }
-                    else if (signInStage == 2)
+                    webDriver.Navigate().GoToUrl($"https://x.com/{username}/following"); // Click on the "Following" tab
+                    userDelay = randomDelay.Next(2000, 3000); // Allow the page to load / mimic delay
+                    Thread.Sleep(userDelay);
+                    Console.WriteLine("Following:"); // Print the usernames of each following user
+                    foreach (IWebElement element in webDriver.FindElements(By.CssSelector(".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3")))
                     {
-                        break;
+                        string text = element.Text;
+                        if (text.Contains("@") && text.StartsWith("@"))
+                        {
+                            Console.WriteLine(text);
+                        }
                     }
-                    Thread.Sleep(1000); // check every 1 second
                 }
-                // Navigate to the followers website
-                webDriver.Navigate().GoToUrl($"https://x.com/{username}/followers");
-                int userDelay = randomDelay.Next(2000, 3000); // Allow the page to load / mimic delay
-                Thread.Sleep(userDelay);
-                Console.WriteLine("Followers:"); // Print the usernames of each follower
-                foreach (IWebElement element in webDriver.FindElements(By.CssSelector(".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3")))
+                finally
                 {
-                    string text = element.Text;
-                    if (text.Contains("@") && text.StartsWith("@"))
+                    if (webDriver != null)
                     {
-                        Console.WriteLine(text);
-                    }
-                }
-                webDriver.Navigate().GoToUrl($"https://x.com/{username}/following"); // Click on the "Following" tab
-                userDelay = randomDelay.Next(2000, 3000); // Allow the page to load / mimic delay
-                Thread.Sleep(userDelay);
-                Console.WriteLine("Following:"); // Print the usernames of each following user
-                foreach (IWebElement element in webDriver.FindElements(By.CssSelector(".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3")))
-                {
-                    string text = element.Text;
-                    if (text.Contains("@") && text.StartsWith("@"))
-                    {
-                        Console.WriteLine(text);
+                        webDriver.Quit();
+                        webDriver.Dispose();
                     }
                 }
                 return Results.Ok("test test test");
