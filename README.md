@@ -51,9 +51,7 @@ Just me at the moment!
 
 ## TO DO
 
-- Have selenium run in the background to extract the followers/followings
-  - provide a walkthrough 
-- Provide a loading screen
+- Handle user closing selenium browser
 - List the followers and following on either side
 - Allow the user by clicking a username to load their profile page for them to manually follow back or unfollow
-- Ditch Gui and create an actual front end using idk Bun
+- Ditch Gui and create an actual front end using idk htmx
