@@ -1,6 +1,5 @@
 // X Loyalty Form Builder Class to improve readability
 using Microsoft.Extensions.Hosting;
-using OpenQA.Selenium;
 
 public class XLoyaltyFormBuilder
 {
