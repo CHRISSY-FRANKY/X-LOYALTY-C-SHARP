@@ -8,6 +8,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 
 public class XLoyaltyHost
 {
@@ -64,20 +67,21 @@ public class XLoyaltyHost
 
     private static void ConfigureGetFollowingFollowersLists(IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapGet("/FollowingFollowersLists", async (string username, IConfiguration configuration, HttpResponse response) =>
+        _ = endpoints.MapGet("/FollowingFollowersLists", static async (string username, IConfiguration configuration, HttpResponse response) =>
         {
             Thread.Sleep(3000);
+            List<string> followersToFollowBack = []; // will contain followers user is not following to follow
+            List<string> nonFollowersToUnFollow = [];
+            Dictionary<byte, List<string>> followersToFollowUnfollow = [];
             try
             {
                 IWebDriver webDriver = new ChromeDriver(); // Google's tentacles are everywhere
                 Random randomDelay = new Random(); // Help mimic human delay
-
                 webDriver.Manage().Window.Maximize(); // Maximize the browser for a better experience
                 webDriver.Navigate().GoToUrl($"https://x.com/i/flow/login?redirect_after_login=%2F{username}"); // Have the user sign in
                 byte signInStage = 0; // Keep track of the user logging in
-                try
+                try // Try signing in to load your followers and following page to borrow the usernames
                 {
-
                     while (true)
                     {
 
@@ -97,47 +101,118 @@ public class XLoyaltyHost
                         }
                         Thread.Sleep(1000); // check every 1 second
                     }
-                    // Navigate to the followers website
-                    webDriver.Navigate().GoToUrl($"https://x.com/{username}/followers");
-                    int userDelay = randomDelay.Next(2000, 3000); // Allow the page to load / mimic delay
+
+
+                    webDriver.Navigate().GoToUrl($"https://x.com/{username}/followers"); // Navigate to the followers website
+                    int userDelay = randomDelay.Next(1000, 1500); // Allow the page to load / mimic delay
                     Thread.Sleep(userDelay);
-                    Console.WriteLine("Followers:"); // Print the usernames of each follower
-                    foreach (IWebElement element in webDriver.FindElements(By.CssSelector(".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3")))
+                    // Collect username followers
+                    List<string> followers = [];
+                    long currentScrollHeight = 0;
+                    long previousScrollHeight = 0;
+                    while (true)
                     {
-                        string text = element.Text;
-                        if (text.Contains("@") && text.StartsWith("@"))
+                        foreach (IWebElement element in webDriver.FindElements(By.CssSelector(".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3")))
                         {
-                            Console.WriteLine(text);
+                            string text = element.Text;
+                            if (text.Contains("@") && text.StartsWith("@"))
+                            {
+                                followers.Add(text.Substring(1));
+                            }
                         }
+
+                        webDriver.FindElement(By.TagName("body")).SendKeys(OpenQA.Selenium.Keys.PageDown);
+
+                        // Get the current scroll height
+                        currentScrollHeight = (long)((IJavaScriptExecutor)webDriver).ExecuteScript("return document.body.scrollHeight");
+                        Thread.Sleep(randomDelay.Next(500, 750));
+                        // Check if we've reached the bottom
+                        if (currentScrollHeight == previousScrollHeight)
+                        {
+                            break;
+                        }
+
+                        previousScrollHeight = currentScrollHeight;
                     }
+                    followers = followers.ToHashSet().ToList();
+
                     webDriver.Navigate().GoToUrl($"https://x.com/{username}/following"); // Click on the "Following" tab
-                    userDelay = randomDelay.Next(2000, 3000); // Allow the page to load / mimic delay
+                    userDelay = randomDelay.Next(1000, 1500); // Allow the page to load / mimic delay
                     Thread.Sleep(userDelay);
-                    Console.WriteLine("Following:"); // Print the usernames of each following user
-                    foreach (IWebElement element in webDriver.FindElements(By.CssSelector(".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3")))
+
+                    List<string> followings = []; // Print the usernames of each following user
+                    
+                    while (true)
                     {
-                        string text = element.Text;
-                        if (text.Contains("@") && text.StartsWith("@"))
+                        foreach (IWebElement element in webDriver.FindElements(By.CssSelector(".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3")))
                         {
-                            Console.WriteLine(text);
+                            string text = element.Text;
+                            if (text.Contains("@") && text.StartsWith("@"))
+                            {
+                                followings.Add(text.Substring(1));
+                            }
                         }
+
+                        webDriver.FindElement(By.TagName("body")).SendKeys(OpenQA.Selenium.Keys.PageDown);
+
+                        // Get the current scroll height
+                        currentScrollHeight = (long)((IJavaScriptExecutor)webDriver).ExecuteScript("return document.body.scrollHeight");
+                        Thread.Sleep(randomDelay.Next(500, 750));
+                        // Check if we've reached the bottom
+                        if (currentScrollHeight == previousScrollHeight)
+                        {
+                            break;
+                        }
+
+                        previousScrollHeight = currentScrollHeight;
                     }
+                    followings = followings.ToHashSet().ToList();
+                    followersToFollowBack = GetFollowersImNonFollowing(followers, followings); // will contain followers user is not following to follow
+                    nonFollowersToUnFollow = GetNonFollowersImFollowing(followers, followings); // will contain following not follower to unfollow
+                    followersToFollowUnfollow.Add(0, followersToFollowBack);
+                    followersToFollowUnfollow.Add(1, nonFollowersToUnFollow);
                 }
                 finally
                 {
-                    if (webDriver != null)
+                    if (webDriver != null) // Close the web browser after it's done borrowing the usernames
                     {
                         webDriver.Quit();
                         webDriver.Dispose();
                     }
                 }
-                return Results.Ok("test test test");
             }
             catch (HttpRequestException)
             {
                 return Results.BadRequest(); // Something went horribly wrong on our end
             }
+            return Results.Ok(JsonSerializer.Serialize(followersToFollowUnfollow));
         }).WithName("FollowingFollowersLists");
+    }
+
+    private static List<string> GetFollowersImNonFollowing(List<string> followers, List<string> followings)
+    {
+        List<string> followersImNotFollowing = [];
+        foreach (string follower in followers)
+        {
+            if (!followings.Contains(follower))
+            {
+                followersImNotFollowing.Add(follower);
+            }
+        }
+        return followersImNotFollowing;
+    }
+
+    private static List<string> GetNonFollowersImFollowing(List<string> followers, List<string> followings)
+    {
+        List<string> nonFollowersImFollowing = [];
+        foreach (string following in followings)
+        {
+            if (!followers.Contains(following))
+            {
+                nonFollowersImFollowing.Add(following);
+            }
+        }
+        return nonFollowersImFollowing;
     }
 
     private static void ConfigureVerifyUsernameEndpoint(IEndpointRouteBuilder endpoints)
