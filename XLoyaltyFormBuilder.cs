@@ -1,5 +1,7 @@
 // X Loyalty Form Builder Class to improve readability
 using Microsoft.Extensions.Hosting;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 public class XLoyaltyFormBuilder
 {
@@ -159,22 +161,25 @@ public class XLoyaltyFormBuilder
         }
     }
 
-    private async Task<string> GetFollowingFollowersLists(string xUsername)
+    private async Task<Dictionary<string, List<string>>> GetFollowingFollowersLists(string xUsername)
     {
         // Create local http client
         using (var client = new HttpClient())
         {
             // Get a response from the request sent
             var response = await client.GetAsync($"http://localhost:5115/FollowingFollowersLists?username={xUsername}");
+            Dictionary<string, List<string>> dLists = [];
             // Response based on the response
             if (response.IsSuccessStatusCode)
             {
-                string responseString = await response.Content.ReadAsStringAsync();
-                return responseString;
+                string responseString = await response.Content.ReadAsStringAsync(); // Get the response string
+                JsonDocument doc = JsonDocument.Parse(responseString); // Convert the string to a json
+                dLists = doc.RootElement.Deserialize<Dictionary<string, List<string>>>(); // Convert the json to a dictionary
+                return dLists;
             }
             else
             {
-                return "error";
+                return dLists;
             }
         }
 
@@ -207,7 +212,8 @@ public class XLoyaltyFormBuilder
     // Add a button to submit username and to try again
     public XLoyaltyFormBuilder AddSubmitTryAgainButton(Point location, Size size, IHost? host)
     {
-        this.form.FormClosing += (sender, e) => { // Dispose the host before closing the form
+        this.form.FormClosing += (sender, e) =>
+        { // Dispose the host before closing the form
             host.Dispose();
         };
         // Create a submit try again button to submit a request to the x api for username search
@@ -242,10 +248,11 @@ public class XLoyaltyFormBuilder
                     // Disable form
                     form.Enabled = false;
                     // Username exists, get lists of following and followers
-                    string followingFollowersLists = await GetFollowingFollowersLists(usernameTextBox.Text);
+                    Dictionary<string, List<string>> followingFollowersLists = await GetFollowingFollowersLists(usernameTextBox.Text);
+
                     // Enable form
                     form.Enabled = true;
-                    Console.WriteLine(followingFollowersLists);
+                    Console.WriteLine(JsonSerializer.Serialize(followingFollowersLists));
                 }
             }
             else
