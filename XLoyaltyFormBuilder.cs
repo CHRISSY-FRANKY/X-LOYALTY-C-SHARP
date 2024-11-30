@@ -161,25 +161,24 @@ public class XLoyaltyFormBuilder
         }
     }
 
-    private async Task<Dictionary<string, List<string>>> GetFollowingFollowersLists(string xUsername)
+    private async Task<string> GetFollowingFollowersLists(string xUsername)
     {
         // Create local http client
         using (var client = new HttpClient())
         {
             // Get a response from the request sent
             var response = await client.GetAsync($"http://localhost:5115/FollowingFollowersLists?username={xUsername}");
-            Dictionary<string, List<string>> dLists = [];
+            string responseString = "";
+
             // Response based on the response
             if (response.IsSuccessStatusCode)
             {
-                string responseString = await response.Content.ReadAsStringAsync(); // Get the response string
-                JsonDocument doc = JsonDocument.Parse(responseString); // Convert the string to a json
-                dLists = doc.RootElement.Deserialize<Dictionary<string, List<string>>>(); // Convert the json to a dictionary
-                return dLists;
+                responseString = await response.Content.ReadAsStringAsync(); // Get the response string
+                return responseString;
             }
             else
             {
-                return dLists;
+                return responseString;
             }
         }
 
@@ -248,11 +247,10 @@ public class XLoyaltyFormBuilder
                     // Disable form
                     form.Enabled = false;
                     // Username exists, get lists of following and followers
-                    Dictionary<string, List<string>> followingFollowersLists = await GetFollowingFollowersLists(usernameTextBox.Text);
-
+                    string responseString = await GetFollowingFollowersLists(usernameTextBox.Text);
+                    Console.WriteLine(responseString);
                     // Enable form
                     form.Enabled = true;
-                    Console.WriteLine(JsonSerializer.Serialize(followingFollowersLists));
                 }
             }
             else
