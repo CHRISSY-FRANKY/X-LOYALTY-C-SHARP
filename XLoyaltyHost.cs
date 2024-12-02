@@ -104,7 +104,7 @@ public class XLoyaltyHost
 
 
                     webDriver.Navigate().GoToUrl($"https://x.com/{username}/followers"); // Navigate to the followers website
-                    int userDelay = randomDelay.Next(1000, 1500); // Allow the page to load / mimic delay
+                    int userDelay = randomDelay.Next(500, 1000); // Allow the page to load / mimic delay
                     Thread.Sleep(userDelay);
                     // Collect username followers
                     List<string> followers = [];
@@ -137,7 +137,7 @@ public class XLoyaltyHost
                     followers = followers.ToHashSet().ToList();
 
                     webDriver.Navigate().GoToUrl($"https://x.com/{username}/following"); // Click on the "Following" tab
-                    userDelay = randomDelay.Next(1000, 1500); // Allow the page to load / mimic delay
+                    userDelay = randomDelay.Next(500, 1000); // Allow the page to load / mimic delay
                     Thread.Sleep(userDelay);
 
                     List<string> followings = []; // Print the usernames of each following user
@@ -157,7 +157,7 @@ public class XLoyaltyHost
 
                         // Get the current scroll height
                         currentScrollHeight = (long)((IJavaScriptExecutor)webDriver).ExecuteScript("return document.body.scrollHeight");
-                        Thread.Sleep(randomDelay.Next(500, 750));
+                        Thread.Sleep(randomDelay.Next(250, 500));
                         // Check if we've reached the bottom
                         if (currentScrollHeight == previousScrollHeight)
                         {
