@@ -1,5 +1,6 @@
 // X Loyalty Form Builder Class to improve readability
 using Microsoft.Extensions.Hosting;
+using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -12,6 +13,7 @@ public class XLoyaltyFormBuilder
     private PictureBox elonSmilingPictureBox;
     private PictureBox elonGoFYourselfPictureBox;
     private Button submitTryAgainButton;
+    private Panel usernamesScrollablePanel;
 
     public XLoyaltyFormBuilder(Size formSize)
     {
@@ -126,6 +128,21 @@ public class XLoyaltyFormBuilder
             // Just hide the elon images
             elonGoFYourselfPictureBox.Visible = false;
         };
+        return this;
+    }
+
+    public XLoyaltyFormBuilder AddFollowersFollowingScrollControl()
+    {
+        // Create a new ScrollablePanel
+        usernamesScrollablePanel = new Panel
+        {
+            Location = new Point(0, 180),
+            Size = new Size(420, 200),
+            AutoScroll = true,
+        };
+        // Add the ScrollablePanel to the Form
+        form.Controls.Add(usernamesScrollablePanel);
+        usernamesScrollablePanel.Visible = false;
         return this;
     }
 
@@ -248,7 +265,8 @@ public class XLoyaltyFormBuilder
                     form.Enabled = false;
                     // Username exists, get lists of following and followers
                     string responseString = await GetFollowingFollowersLists(usernameTextBox.Text);
-                    Console.WriteLine(responseString);
+                    abstractFollowingFollowersListsToBuildFormLinks(responseString);
+                    usernamesScrollablePanel.Visible = true;
                     // Enable form
                     form.Enabled = true;
                 }
@@ -263,6 +281,86 @@ public class XLoyaltyFormBuilder
         form.FormClosed += async (sender, e) => await host.StopAsync();
         return this;
     }
+
+    private int BuildFormLinksOfUsernamesYoureNotFollowingBack(List<string> usernameList)
+    {
+        int yLocation = 20;
+        int xLocation = 5;
+        int count = usernameList.Count();
+        int index = count - usernameList.Count();
+        while (index < count)
+        {
+            // Create a new Button
+            Button button = new Button();
+            button.Text = usernameList[index];
+            button.Location = new Point(xLocation, yLocation);
+            // Add a click event handler to the button
+            button.Click += (sender, args) =>
+            {
+                // Open Google in the default web browser
+                Process.Start(new ProcessStartInfo($"https://x.com/{button.Text}") { UseShellExecute = true });
+            };
+            // Add the button to the Panel
+            usernamesScrollablePanel.Controls.Add(button);
+            xLocation += 5;
+            if ((index + 1) % 3 == 0)
+            {
+                xLocation = 0;
+                yLocation += 20;
+            }
+            index += 1;
+        }
+        return yLocation;
+    }
+
+    private void BuildFormLinksOfUsernamesNotFollowingYouBack(int yLocation, List<string> usernameList)
+    {
+        yLocation += 40;
+        int xLocation = 5;
+        int count = usernameList.Count();
+        int index = count - usernameList.Count();
+        while (index < count)
+        {
+            // Create a new Button
+            Button button = new Button();
+            button.Text = usernameList[index];
+            button.Location = new Point(xLocation, yLocation);
+            // Add a click event handler to the button
+            button.Click += (sender, args) =>
+            {
+                // Open Google in the default web browser
+                Process.Start(new ProcessStartInfo($"https://x.com/{button.Text}") { UseShellExecute = true });
+            };
+            // Add the button to the Panel
+            usernamesScrollablePanel.Controls.Add(button);
+            xLocation += 5;
+            if ((index + 1) % 3 == 0)
+            {
+                xLocation = 0;
+                yLocation += 20;
+            }
+            index += 1;
+        }
+    }
+
+    private void abstractFollowingFollowersListsToBuildFormLinks(string responseString)
+    {
+        // Parse the JSON string into a dictionary of lists
+        Dictionary<string, List<string>> dictOfLists = [];
+        try
+        {
+            dictOfLists = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(responseString);
+        }
+        finally
+        {
+            // Access the lists using the keys
+            List<string> list0 = dictOfLists["0"];
+            List<string> list1 = dictOfLists["1"];
+            int yLocation = BuildFormLinksOfUsernamesYoureNotFollowingBack(list0);
+            BuildFormLinksOfUsernamesNotFollowingYouBack(yLocation, list1);
+        }
+    }
+
 
     public XLoyaltyFormBuilder Run()
     {
