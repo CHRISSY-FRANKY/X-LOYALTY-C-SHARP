@@ -41,10 +41,6 @@ Comming Soon! ^-^
 
 Just me at the moment!
 
-## Demos
-
-- [Version 1.0](https://rumble.com/v5no48b-xloyalty-version-1.0-demo.html)
-
 ## TO DO
 
 - Figure out how a username i wasn't following showed up in the list of usernames not following you back
