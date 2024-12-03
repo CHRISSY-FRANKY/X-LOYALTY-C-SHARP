@@ -293,10 +293,10 @@ public class XLoyaltyFormBuilder
             Width = 300,
             Height = 30
         };
+        usernamesScrollablePanel.Controls.Add(youreNotFollowingBackLabel);
         // Set up positioning
         int yLocation = 30;
         int xLocation = 5;
-        usernamesScrollablePanel.Controls.Add(youreNotFollowingBackLabel);
         // Map the usernames onto the scroll panel
         int count = usernameList.Count();
         int index = count - usernameList.Count();
@@ -331,25 +331,29 @@ public class XLoyaltyFormBuilder
 
     private void BuildFormLinksOfUsernamesNotFollowingYouBack(int yLocation, List<string> usernameList)
     {
-        // Create the Who Youre Not Following Back label
+        // Create the Whose not following you back label
         Label notFollowingYouBackLabel = new Label {
-            Location = new Point(5, 0),
-            Text = "Who You're Not Following Back!",
+            Location = new Point(5, yLocation),
+            Text = "Who IS Not Following You Back!",
             ForeColor = Color.White,
             Width = 300,
             Height = 30
         };
+        usernamesScrollablePanel.Controls.Add(notFollowingYouBackLabel);
         // Setup the positioning
-        yLocation += 40;
+        yLocation += 30;
         int xLocation = 5;
         int count = usernameList.Count();
         int index = count - usernameList.Count();
         while (index < count)
         {
             // Create a new Button
-            Button button = new Button();
-            button.Text = usernameList[index];
-            button.Location = new Point(xLocation, yLocation);
+            Button button = new Button{
+                Text = usernameList[index],
+                Location = new Point(xLocation, yLocation),
+                ForeColor = Color.White,
+                Size = new Size(120, 30)
+            };
             // Add a click event handler to the button
             button.Click += (sender, args) =>
             {
@@ -358,11 +362,12 @@ public class XLoyaltyFormBuilder
             };
             // Add the button to the Panel
             usernamesScrollablePanel.Controls.Add(button);
-            xLocation += 5;
+            // Update the positioning for the following button
+            xLocation += 135;
             if ((index + 1) % 3 == 0)
             {
-                xLocation = 0;
-                yLocation += 20;
+                xLocation = 5;
+                yLocation += 30;
             }
             index += 1;
         }
@@ -408,7 +413,7 @@ public class XLoyaltyFormBuilder
                 else if (isTraversingUsername && currentChar == ',')
                 {
                     isTraversingUsername = false;
-                    string username = currentUsername.ToString().Substring(0, currentUsername.Length - 2);
+                    string username = currentUsername.ToString().Replace("\"", "");
                     if (isFirstList)
                     {
                         followersToFollowBack.Add(username);
@@ -427,7 +432,7 @@ public class XLoyaltyFormBuilder
             }
         }
         int yPosition = BuildFormLinksOfUsernamesYoureNotFollowingBack(followersToFollowBack);
-        BuildFormLinksOfUsernamesNotFollowingYouBack(yPosition, nonFollowersToUnFollow);
+        BuildFormLinksOfUsernamesNotFollowingYouBack(yPosition + 45, nonFollowersToUnFollow);
         elonFrowningPictureBox.Visible = false;
         elonSmilingPictureBox.Visible = false;
         elonGoFYourselfPictureBox.Visible = false;
