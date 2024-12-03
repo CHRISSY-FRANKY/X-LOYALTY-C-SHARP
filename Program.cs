@@ -15,7 +15,7 @@ public class Program
             .AddElonFrowningPictureBox("elonFrowning.jpeg", new Point(0, 180), new Size(420, 200))
             .AddElonGoFYourselfPictureBox("elonFYourself.jpg", new Point(0, 180), new Size(420, 200))
             .AddSubmitTryAgainButton(new Point(180, 120), new Size(60, 30), xLoyaltyHost.GetHost())
-            .AddFollowersFollowingScrollControl()
+            .AddUsernamesScrollPanel()
             .Run();
     }
 
