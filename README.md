@@ -47,10 +47,8 @@ Just me at the moment!
 
 ## TO DO
 
-- Handle user closing selenium browser
-- Have GUI show the followers and following buttons     
-  - User clicks button to load their x profile for them to decide to follow or unfollow
-  - Unhighlight which usernames have been dealt with
+- Handle the user interupting selenium
+- Refractor parts of the code to be more efficient
 
 ## Disclaimer :wink:
 
