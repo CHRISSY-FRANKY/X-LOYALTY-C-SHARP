@@ -377,7 +377,7 @@ public class XLoyaltyFormBuilder
     {
         // Get rid of the dictionary symbols
         responseString = responseString.Substring(1, responseString.Length - 2);
-        responseString = responseString.Replace("\"", "");
+        responseString = responseString.Replace("\\", "").Replace("\"", "");
         // Keep track of the list and username
         bool isTraversingList = false;
         bool isTraversingUsername = false;
@@ -397,6 +397,7 @@ public class XLoyaltyFormBuilder
             }
             else if (isTraversingList && currentChar == ']')
             {
+                currentUsername.Clear();
                 isTraversingList = false;
                 isFirstList = false;
             }
@@ -413,16 +414,15 @@ public class XLoyaltyFormBuilder
                 else if (isTraversingUsername && currentChar == ',')
                 {
                     isTraversingUsername = false;
-                    string username = currentUsername.ToString().Replace("\"", "");
                     if (isFirstList)
                     {
-                        followersToFollowBack.Add(username);
+                        followersToFollowBack.Add(currentUsername.ToString());
                     }
                     else
                     {
-                        nonFollowersToUnFollow.Add(username);
+                        nonFollowersToUnFollow.Add(currentUsername.ToString());
                     }
-                    currentUsername = currentUsername.Clear();
+                    currentUsername.Clear();
                 }
                 if (isTraversingUsername)
                 {
