@@ -1,6 +1,7 @@
 // X Loyalty Form Builder Class to improve readability
 using Microsoft.Extensions.Hosting;
 using System.Diagnostics;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -265,7 +266,7 @@ public class XLoyaltyFormBuilder
                     form.Enabled = false;
                     // Username exists, get lists of following and followers
                     string responseString = await GetFollowingFollowersLists(usernameTextBox.Text);
-                    abstractFollowingFollowersListsToBuildFormLinks(responseString);
+                    AbstractFollowingFollowersListsToBuildFormLinks(responseString);
                     usernamesScrollablePanel.Visible = true;
                     // Enable form
                     form.Enabled = true;
@@ -343,22 +344,65 @@ public class XLoyaltyFormBuilder
         }
     }
 
-    private void abstractFollowingFollowersListsToBuildFormLinks(string responseString)
+    private void AbstractFollowingFollowersListsToBuildFormLinks(string responseString)
     {
-        // Parse the JSON string into a dictionary of lists
-        Dictionary<string, List<string>> dictOfLists = [];
-        try
+        // Get rid of the dictionary symbols
+        responseString = responseString.Substring(1, responseString.Length - 2);
+        responseString = responseString.Replace("\"", "");
+        // Keep track of the list and username
+        bool isTraversingList = false;
+        bool isTraversingUsername = false;
+        bool isFirstList = true;
+        // Save the usernames in each of their respective lists
+        List<string> followersToFollowBack = [];
+        List<string> nonFollowersToUnFollow = [];
+        StringBuilder currentUsername = new StringBuilder();
+        for (int i = 0; i < responseString.Length; i++)
         {
-            dictOfLists = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(responseString);
+            char currentChar = responseString.ElementAt(i);
+            // Searches for list
+            if (!isTraversingList && currentChar == '[')
+            {
+                // List found
+                isTraversingList = true;
+            }
+            else if (isTraversingList && currentChar == ']')
+            {
+                isTraversingList = false;
+                isFirstList = false;
+            }
+            // Traversing List, Searches for username
+            else if (isTraversingList)
+            {
+
+                // Username found
+                if (!isTraversingUsername && Char.IsAsciiLetter(currentChar))
+                {
+                    isTraversingUsername = true;
+                }
+                // Username has ended
+                else if (isTraversingUsername && currentChar == ',')
+                {
+                    isTraversingUsername = false;
+                    if (isFirstList)
+                    {
+                        followersToFollowBack.Add(currentUsername.ToString());
+                    }
+                    else
+                    {
+                        nonFollowersToUnFollow.Add(currentUsername.ToString());
+                    }
+                    currentUsername = currentUsername.Clear();
+                }
+                if (isTraversingUsername)
+                {
+                    currentUsername.Append(currentChar);
+                }
+
+            }
         }
-        finally
-        {
-            // Access the lists using the keys
-            List<string> list0 = dictOfLists["0"];
-            List<string> list1 = dictOfLists["1"];
-            int yLocation = BuildFormLinksOfUsernamesYoureNotFollowingBack(list0);
-            BuildFormLinksOfUsernamesNotFollowingYouBack(yLocation, list1);
-        }
+        int yPosition = BuildFormLinksOfUsernamesYoureNotFollowingBack(followersToFollowBack);
+        BuildFormLinksOfUsernamesNotFollowingYouBack(yPosition, nonFollowersToUnFollow);
     }
 
 
