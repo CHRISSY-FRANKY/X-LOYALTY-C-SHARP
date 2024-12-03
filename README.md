@@ -48,12 +48,12 @@ Just me at the moment!
 ## TO DO
 
 - Handle user closing selenium browser
-- List the followers and following on either side
-- Allow the user by clicking a username to load their profile page for them to manually follow back or unfollow
-- Ditch Gui and create an actual front end using idk htmx
+- Have GUI show the followers and following buttons     
+  - User clicks button to load their x profile for them to decide to follow or unfollow
+  - Unhighlight which usernames have been dealt with
 
 ## Disclaimer :wink:
 
-*Instagram is owned by a Reptilian Extraterrestial!*
+The beta version will be hosted somewhere and be provided an htmx front end
 
-The beta version and final release will not be public.
+The final version will be hosted on Azure and will offer an htmx front end
