@@ -1,4 +1,4 @@
-# X LOYALTY ALPHA :heart:
+# X LOYALTY :heart:
 
 X Loyalty helps you identify and divorce accounts that don't follow you back, ensuring a loyal community. 
 
@@ -43,9 +43,8 @@ Just me at the moment!
 
 ## TO DO
 
-- Figure out how a username i wasn't following showed up in the list of usernames not following you back
-- Handle the user interupting selenium
 - Refractor parts of the code to be more efficient
+- Handle the user interupting selenium
 - Figure out how to package it into an .exe to use on any windows computer
 
 ## Disclaimer :wink:
