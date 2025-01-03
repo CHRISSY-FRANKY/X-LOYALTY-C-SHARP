@@ -1,4 +1,3 @@
-using System.Security.Authentication;
 using System.Text.Json;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -7,9 +6,6 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Support.UI;
 
@@ -66,130 +62,156 @@ public class XLoyaltyHost
         });
     }
 
+    private static void MaximizeWebDriver(IWebDriver webDriver, WebDriverWait waiter, Random randomDelay) // Maximizes the web driver safely
+    {
+        waiter.Until(d => ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState").Equals("complete")); // Wait for the driver to load
+        Thread.Sleep((int)(randomDelay.NextSingle() * 2 + 1));
+        webDriver.Manage().Window.Maximize(); // Maximize the browser for a better experience
+        Console.WriteLine("WEB DRIVER MAXIMIZED!");
+    }
+
+    private static void LoadSignInAndWaitForAuthentication(IWebDriver webDriver, WebDriverWait waiter, string username) // Loads the sign in page and waits for the user to sign in
+    {
+        webDriver.Navigate().GoToUrl($"https://x.com/i/flow/login?redirect_after_login=%2F{username}"); // Have the user sign in
+        waiter.Until(d => d.Url.Contains($"https://x.com/i/flow/login?redirect_after_login=%2F{username}")); // Wait for sign in page to load
+        Console.WriteLine("USER IS TRYING TO SIGN IN!");
+        waiter.Until(d => d.Url.Contains($"https://x.com/{username}?mx=2")); // Wait for the user to sign in
+        Console.WriteLine("USER SIGNED IN!");
+    }
+
+    private static List<string> LoadFollowingsPageScrollAndExtractUniqueUsernames(IWebDriver webDriver, WebDriverWait waiter, Random randomDelay, string username)
+    {
+        List<string> usernames = []; // Collect username followers
+        long currentScrollHeight = 0;
+        long previousScrollHeight = 0;
+        IJavaScriptExecutor js = (IJavaScriptExecutor)webDriver;
+        webDriver.Navigate().GoToUrl($"https://x.com/{username}/following"); // Navigate to the following tab
+        waiter.Until(d =>
+            d.Url.Contains($"https://x.com/{username}/following") &&
+            d.FindElements(By.CssSelector(".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3")).Count > 1 &&
+            ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState").Equals("complete")
+        );
+        Console.WriteLine("NAVIGATED TO FOLLOWING!");
+        js = (IJavaScriptExecutor)webDriver;
+        while (true) // Collect while scrolling
+        {
+            foreach (IWebElement element in webDriver.FindElements(By.CssSelector(".css-175oi2r.r-vacyoi.r-ttdzmv")))
+            {
+                js.ExecuteScript("arguments[0].parentNode.removeChild(arguments[0]);", element);
+            }
+            Thread.Sleep((int)(randomDelay.NextSingle() * 2) + 1);
+            foreach (IWebElement element in webDriver.FindElements(By.CssSelector(".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3")))
+            {
+                string text;
+                try
+                {
+                    string cssColorValue = element.GetCssValue("color");
+                    if (cssColorValue == "rgb(29, 155, 240)") // Skip the usernames from bios
+                    {
+                        continue;
+                    }
+                    text = element.Text;
+                    if (text.Contains("@") && text.StartsWith("@"))
+                    {
+                        usernames.Add(text.Substring(1));
+                    }
+                }
+                catch (StaleElementReferenceException e)
+                {
+                    Console.WriteLine(e.StackTrace);
+                    continue;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.StackTrace);
+                    continue;
+                }
+            }
+            webDriver.FindElement(By.TagName("body")).SendKeys(OpenQA.Selenium.Keys.PageDown); // Scroll down
+            waiter.Until(d =>
+                d.Url.Contains($"https://x.com/{username}/following") &&
+                d.FindElements(By.CssSelector(".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3")).Count > 1 &&
+                ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState").Equals("complete")
+            );
+            currentScrollHeight = (long)((IJavaScriptExecutor)webDriver).ExecuteScript("return document.body.scrollHeight"); // Get the current scroll height
+            if (currentScrollHeight == previousScrollHeight) // Check if we've reached the bottom
+            {
+                break;
+            }
+            previousScrollHeight = currentScrollHeight; // Set the new previous scroll height
+        }
+        return usernames.ToHashSet().ToList();
+    }
+
+    private static List<string> LoadFollowersPageScrollAndExtractUniqueUsernames(IWebDriver webDriver, WebDriverWait waiter, Random randomDelay, string username)
+    {
+        webDriver.Navigate().GoToUrl($"https://x.com/{username}/followers"); // Navigate to the followers tab
+        waiter.Until(d =>
+            d.Url.Contains($"https://x.com/{username}/followers") &&
+            d.FindElements(By.CssSelector(".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3")).Count > 1 &&
+            ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState").Equals("complete")
+        );
+        Console.WriteLine("NAVIGATED TO FOLLOWERS!");
+
+        List<string> usernames = []; // Collect username followers
+        long currentScrollHeight = 0;
+        long previousScrollHeight = 0;
+        IJavaScriptExecutor js = (IJavaScriptExecutor)webDriver;
+        while (true) // Collect while scrolling
+        {
+            foreach (IWebElement element in webDriver.FindElements(By.CssSelector(".css-175oi2r.r-vacyoi.r-ttdzmv")))
+            {
+                js.ExecuteScript("arguments[0].parentNode.removeChild(arguments[0]);", element);
+            }
+            Thread.Sleep((int)(randomDelay.NextSingle() * 2 + 1));
+            foreach (IWebElement element in webDriver.FindElements(By.CssSelector(".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3")))
+            {
+                string cssColorValue = element.GetCssValue("color");
+                if (cssColorValue == "rgb(29, 155, 240)") // Skip the usernames from bios
+                {
+                    continue;
+                }
+                string text;
+                text = element.Text;
+                if (text.Contains("@") && text.StartsWith("@"))
+                {
+                    usernames.Add(text.Substring(1));
+                }
+            }
+            webDriver.FindElement(By.TagName("body")).SendKeys(OpenQA.Selenium.Keys.PageDown); // Scroll down
+            waiter.Until(d =>
+                d.Url.Contains($"https://x.com/{username}/followers") &&
+                d.FindElements(By.CssSelector(".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3")).Count > 1 &&
+                ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState").Equals("complete")
+            );
+            currentScrollHeight = (long)((IJavaScriptExecutor)webDriver).ExecuteScript("return document.body.scrollHeight"); // Get the current scroll height
+            if (currentScrollHeight == previousScrollHeight) // Check if we've reached the bottom
+            {
+                break;
+            }
+            previousScrollHeight = currentScrollHeight; // Set new previous Scroll height
+        }
+        return usernames.ToHashSet().ToList();
+    }
+
     private static void ConfigureGetFollowingFollowersLists(IEndpointRouteBuilder endpoints)
     {
         _ = endpoints.MapGet("/FollowingFollowersLists", static async (string username, IConfiguration configuration, HttpResponse response) =>
         {
-            Thread.Sleep(3000);
+            Random randomDelay = new Random(); // Help mimic human delay
             List<string> followersToFollowBack = []; // will contain followers user is not following to follow
             List<string> nonFollowersToUnFollow = [];
             Dictionary<byte, List<string>> followersToFollowUnfollow = [];
             IWebDriver webDriver = new FirefoxDriver(); // Reject Google's tentacles
+            webDriver.Manage().Timeouts().PageLoad = TimeSpan.FromMilliseconds(1000000); // Prevent the web driver from timing out during extraction
+            WebDriverWait waiter = new WebDriverWait(webDriver, TimeSpan.FromSeconds(30)); // Have the waiter timeout at 30 seconds for poopy connections
             try
             {
-                webDriver.Manage().Timeouts().PageLoad = TimeSpan.FromMilliseconds(1000000);
-                Random randomDelay = new Random(); // Help mimic human delay
-                WebDriverWait waiter = new WebDriverWait(webDriver, TimeSpan.FromSeconds(30)); // Have the waiter timeout at 30 seconds for poopy connections
-                waiter.Until(d => ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState").Equals("complete")); // Wait for the driver to load
-                Thread.Sleep(1000);
-                webDriver.Manage().Window.Maximize(); // Maximize the browser for a better experience
-                Console.WriteLine("WINDOW MAXIMIZED!");
-
-                webDriver.Navigate().GoToUrl($"https://x.com/i/flow/login?redirect_after_login=%2F{username}"); // Have the user sign in
-                waiter.Until(d => d.Url.Contains($"https://x.com/i/flow/login?redirect_after_login=%2F{username}")); // Wait for sign in page to load
-                Console.WriteLine("USER IS TRYING TO SIGN IN!");
-
-                waiter.Until(d => d.Url.Contains($"https://x.com/{username}?mx=2")); // Wait for the user to sign in
-                Console.WriteLine("USER SIGNED IN!");
-
-                webDriver.Navigate().GoToUrl($"https://x.com/{username}/followers"); // Navigate to the followers tab
-                waiter.Until(d =>
-                    d.Url.Contains($"https://x.com/{username}/followers") &&
-                    d.FindElements(By.CssSelector(".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3")).Count > 1 &&
-                    ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState").Equals("complete")
-                );
-                Console.WriteLine("NAVIGATED TO FOLLOWERS!");
-
-                List<string> followers = []; // Collect username followers
-                long currentScrollHeight = 0;
-                long previousScrollHeight = 0;
-                IJavaScriptExecutor js = (IJavaScriptExecutor)webDriver;
-                foreach (IWebElement element in webDriver.FindElements(By.CssSelector(".css-175oi2r.r-vacyoi.r-ttdzmv")))
-                {
-                    js.ExecuteScript("arguments[0].parentNode.removeChild(arguments[0]);", element);
-                }
-                while (true) // Collect while scrolling
-                {
-                    Thread.Sleep((int)(randomDelay.NextSingle() * 2 + 1));
-                    foreach (IWebElement element in webDriver.FindElements(By.CssSelector(".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3")))
-                    {
-                        string cssColorValue = element.GetCssValue("color");
-                        if (cssColorValue == "rgb(29, 155, 240)") // Skip the usernames from bios
-                        {
-                            continue;
-                        }
-                        string text;
-                        text = element.Text;
-                        if (text.Contains("@") && text.StartsWith("@"))
-                        {
-                            followers.Add(text.Substring(1));
-                        }
-                    }
-                    webDriver.FindElement(By.TagName("body")).SendKeys(OpenQA.Selenium.Keys.PageDown); // Scroll down
-                    waiter.Until(d =>
-                        d.Url.Contains($"https://x.com/{username}/followers") &&
-                        d.FindElements(By.CssSelector(".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3")).Count > 1 &&
-                        ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState").Equals("complete")
-                    );
-                    currentScrollHeight = (long)((IJavaScriptExecutor)webDriver).ExecuteScript("return document.body.scrollHeight"); // Get the current scroll height
-                    if (currentScrollHeight == previousScrollHeight) // Check if we've reached the bottom
-                    {
-                        break;
-                    }
-                    previousScrollHeight = currentScrollHeight; // Set new previous Scroll height
-                }
-                followers = followers.ToHashSet().ToList();
-                webDriver.Navigate().GoToUrl($"https://x.com/{username}/following"); // Navigate to the following tab
-                waiter.Until(d =>
-                    d.Url.Contains($"https://x.com/{username}/following") &&
-                    d.FindElements(By.CssSelector(".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3")).Count > 1 &&
-                    ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState").Equals("complete")
-                );
-                Console.WriteLine("NAVIGATED TO FOLLOWING!");
-                js = (IJavaScriptExecutor)webDriver;
-                foreach (IWebElement element in webDriver.FindElements(By.CssSelector(".css-175oi2r.r-vacyoi.r-ttdzmv")))
-                {
-                    js.ExecuteScript("arguments[0].parentNode.removeChild(arguments[0]);", element);
-                }
-                List<string> followings = []; // Collect following usernames
-                while (true) // Collect while scrolling
-                {
-                    Thread.Sleep((int)(randomDelay.NextSingle() * 2) + 1);
-                    foreach (IWebElement element in webDriver.FindElements(By.CssSelector(".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3")))
-                    {
-                        string text;
-                        try
-                        {
-                            string cssColorValue = element.GetCssValue("color");
-                            if (cssColorValue == "rgb(29, 155, 240)") // Skip the usernames from bios
-                            {
-                                continue;
-                            }
-                            text = element.Text;
-                            if (text.Contains("@") && text.StartsWith("@"))
-                            {
-                                followings.Add(text.Substring(1));
-                            }
-                        }
-                        catch (Exception)
-                        {
-                            continue;
-                        }
-                    }
-                    webDriver.FindElement(By.TagName("body")).SendKeys(OpenQA.Selenium.Keys.PageDown); // Scroll down
-                    waiter.Until(d =>
-                        d.Url.Contains($"https://x.com/{username}/following") &&
-                        d.FindElements(By.CssSelector(".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3")).Count > 1 &&
-                        ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState").Equals("complete")
-                    );
-                    currentScrollHeight = (long)((IJavaScriptExecutor)webDriver).ExecuteScript("return document.body.scrollHeight"); // Get the current scroll height
-                    if (currentScrollHeight == previousScrollHeight) // Check if we've reached the bottom
-                    {
-                        break;
-                    }
-                    previousScrollHeight = currentScrollHeight; // Set the new previous scroll height
-                }
-                followings = followings.ToHashSet().ToList();
+                MaximizeWebDriver(webDriver, waiter, randomDelay);
+                LoadSignInAndWaitForAuthentication(webDriver, waiter, username);
+                List<string> followers = LoadFollowersPageScrollAndExtractUniqueUsernames(webDriver, waiter, randomDelay, username);
+                Thread.Sleep((int)(randomDelay.NextSingle() * 2 + 1));
+                List<string> followings = LoadFollowingsPageScrollAndExtractUniqueUsernames(webDriver, waiter, randomDelay, username);
                 followersToFollowBack = GetFollowersImNonFollowing(followers, followings); // will contain followers user is not following to follow
                 nonFollowersToUnFollow = GetNonFollowersImFollowing(followers, followings); // will contain following not follower to unfollow
                 followersToFollowUnfollow.Add(0, followersToFollowBack);
