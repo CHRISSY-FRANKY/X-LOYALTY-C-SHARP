@@ -92,8 +92,8 @@ public class XLoyaltyHost
             ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState").Equals("complete")
         );
         js.ExecuteScript("document.body.style.zoom='25%';");
-        Thread.Sleep((int)(randomDelay.NextSingle() * 3 + 2));
         Console.WriteLine("NAVIGATED TO FOLLOWING!");
+        Thread.Sleep((int)(randomDelay.NextSingle() * 2 + 3));
         js = (IJavaScriptExecutor)webDriver;
         while (true) // Collect while scrolling
         {
