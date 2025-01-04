@@ -1,10 +1,6 @@
-// X Loyalty Form Builder Class to improve readability
 using Microsoft.Extensions.Hosting;
-using OpenQA.Selenium.DevTools.V128.Debugger;
 using System.Diagnostics;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 public class XLoyaltyFormBuilder
 {
@@ -17,13 +13,11 @@ public class XLoyaltyFormBuilder
     private Button submitTryAgainButton;
     private Panel usernamesScrollablePanel;
 
-    public XLoyaltyFormBuilder(Size formSize)
+    public XLoyaltyFormBuilder(Size formSize) // Set application settings
     {
-        // Set application settings
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
-        // Create form based on arguments provided
-        form = new Form
+        form = new Form  // Create form based on arguments provided
         {
             Text = "X LOYALTY",
             MaximizeBox = false,
@@ -34,10 +28,8 @@ public class XLoyaltyFormBuilder
         };
     }
 
-    // Adds Intro Label to Form
-    public XLoyaltyFormBuilder AddIntroLabel(Point location, Size size)
+    public XLoyaltyFormBuilder AddIntroLabel(Point location, Size size) // Creates and adds intro label to Form
     {
-        // Create the label
         introLabel = new()
         {
             Text = "\nWelcome to X LOYALTY!\nEnter an X account username (alphanumeric)\nto determine if it exists or not!",
@@ -51,10 +43,8 @@ public class XLoyaltyFormBuilder
         return this;
     }
 
-    // Adds Username to TextBox
-    public XLoyaltyFormBuilder AddUsernameTextBox(Point location, Size size)
+    public XLoyaltyFormBuilder AddUsernameTextBox(Point location, Size size) // Creates and adds username text box to form
     {
-        // Add the text box to the form
         usernameTextBox = new()
         {
             Text = "Enter Username Here!",
@@ -64,85 +54,63 @@ public class XLoyaltyFormBuilder
             ForeColor = Color.Black,
             TextAlign = HorizontalAlignment.Center
         };
-        // Add the textbox to the form
         form.Controls.Add(usernameTextBox);
         return this;
     }
 
-    // Add Elon Smiling Picture Box
-    public XLoyaltyFormBuilder AddElonSmilingPictureBox(string fileName, Point location, Size size)
+    public XLoyaltyFormBuilder AddElonSmilingPictureBox(string fileName, Point location, Size size) // Create and add Elon Smiling Picture Box
     {
-        // Create elon smiling to show the user when the username exists
         elonSmilingPictureBox = new PictureBox
         {
             Image = Image.FromFile(fileName),
             Location = location,
             Size = size,
             SizeMode = PictureBoxSizeMode.Zoom,
+            Visible = false
         };
         form.Controls.Add(elonSmilingPictureBox);
-        elonSmilingPictureBox.Visible = false;
-        // When the username text box is clicked, the picture box is hidden
-        usernameTextBox.Click += (sender, e) =>
-        {
-            elonSmilingPictureBox.Visible = false;
-        };
+        usernameTextBox.Click += (sender, e) =>  elonSmilingPictureBox.Visible = false; // Picture box is hidden when username text box is re activated
         return this;
     }
 
-    // Add Elon Frowning Picture Box
-    public XLoyaltyFormBuilder AddElonFrowningPictureBox(string fileName, Point location, Size size)
+    public XLoyaltyFormBuilder AddElonFrowningPictureBox(string fileName, Point location, Size size) // Create and add elon frowning picture box
     {
-        // Create elon frowning to show the user when the username does not exist
         elonFrowningPictureBox = new PictureBox
         {
             Image = Image.FromFile(fileName),
             Location = location,
             Size = size,
             SizeMode = PictureBoxSizeMode.Zoom,
+            Visible = false
         };
         form.Controls.Add(elonFrowningPictureBox);
-        elonFrowningPictureBox.Visible = false;
-        // When the username text box is selected, hide picture box
-        usernameTextBox.Click += (sender, e) =>
-        {
-            elonFrowningPictureBox.Visible = false;
-        };
+        usernameTextBox.Click += (sender, e) =>  elonFrowningPictureBox.Visible = false; // Picture box is hidden when username text box is re activated
         return this;
     }
 
-    // Add Elon Go F Yourself Picture Box
-    public XLoyaltyFormBuilder AddElonGoFYourselfPictureBox(string fileName, Point location, Size size)
+    public XLoyaltyFormBuilder AddElonGoFYourselfPictureBox(string fileName, Point location, Size size) // Create and add Elon Go F yourself picture box
     {
-        // Create elon f yourself to show the user you are out of requests
         elonGoFYourselfPictureBox = new PictureBox
         {
             Image = Image.FromFile(fileName),
             Location = location,
             Size = size,
             SizeMode = PictureBoxSizeMode.Zoom,
+            Visible = false
         };
         form.Controls.Add(elonGoFYourselfPictureBox);
-        elonGoFYourselfPictureBox.Visible = false;
-        // When the username text box is selected, hide the picture box
-        usernameTextBox.Click += (sender, e) =>
-        {
-            // Just hide the elon images
-            elonGoFYourselfPictureBox.Visible = false;
-        };
+        usernameTextBox.Click += (sender, e) => elonGoFYourselfPictureBox.Visible = false; // Picture box is hidden when username text box is re activated
         return this;
     }
 
-    public XLoyaltyFormBuilder AddUsernamesScrollPanel()
+    public XLoyaltyFormBuilder AddUsernamesScrollPanel() // Create and add usernames scrollable panel
     {
-        // Create a new ScrollablePanel
         usernamesScrollablePanel = new Panel
         {
             Location = new Point(0, 175),
             Size = new Size(420, 200),
             AutoScroll = true,
         };
-        // Add the ScrollablePanel to the Form
         form.Controls.Add(usernamesScrollablePanel);
         return this;
     }
@@ -154,20 +122,16 @@ public class XLoyaltyFormBuilder
         elonGoFYourselfPictureBox.Visible = goFYourself;
     }
 
-    // Returns whether or not to proceed to the next action after the username has been verified
-    private void UpdateElonMuskImagesBasedOnResponse(XLoyaltyResponseCode response)
+    private void UpdateElonMuskImagesBasedOnResponse(XLoyaltyResponseCode response) 
     {
         switch (response)
         {
-            // Show elon smiling
             case XLoyaltyResponseCode.UsernameExists:
                 UpdateElonMuskImages(false, true, false); // Only Show Elon Smiling Image
                 break;
-            // Elon frowning
             case XLoyaltyResponseCode.UsernameNonExistant:
                 UpdateElonMuskImages(true, false, false); // Only Show Elon Frowning Image
                 break;
-            // Elon telling you to go duck yourself
             case XLoyaltyResponseCode.RequestsLimited:
                 UpdateElonMuskImages(false, false, true); // Only Show Elon Go F Yourself Image
                 break;
@@ -181,59 +145,36 @@ public class XLoyaltyFormBuilder
 
     private async Task<string> GetFollowingFollowersLists(string xUsername)
     {
-        // Create local http client
-        using (var client = new HttpClient())
+        using (var client = new HttpClient()) // Create local http client
         {
-            // Get a response from the request sent
-            var response = await client.GetAsync($"http://localhost:5115/FollowingFollowersLists?username={xUsername}");
+            var response = await client.GetAsync($"http://localhost:5115/FollowingFollowersLists?username={xUsername}"); // Get a response from the request sent
             string responseString = "";
-
-            // Response based on the response
-            if (response.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode) // Response based on the response
             {
                 responseString = await response.Content.ReadAsStringAsync(); // Get the response string
                 return responseString;
             }
-            else
-            {
-                return responseString;
-            }
+            return responseString;
         }
     }
 
-    // Setup method that tests endpoint to determine if a user exists
-    private static async Task<XLoyaltyResponseCode> VerifyUsername(string xUsername)
+    private static async Task<XLoyaltyResponseCode> VerifyUsername(string xUsername) // Setup method that implments endpoint to determine if a user exists
     {
-        // Create local http client
-        using (var client = new HttpClient()) // Using HttpClientFactory or IHttpClientFactory would be more appropriate for production
+        using var client = new HttpClient(); // Using HttpClientFactory or IHttpClientFactory would be more appropriate for production
+        HttpResponseMessage response = await client.GetAsync($"http://localhost:5115/VerifyUsername?username={xUsername}"); // Get a response from a request sent
+        if (response.IsSuccessStatusCode) // Respond based on the response
         {
-            // Get a response from a request sent
-            var response = await client.GetAsync($"http://localhost:5115/VerifyUsername?username={xUsername}");
-
-            // Respond based on the response
-            if (response.IsSuccessStatusCode)
-            {
-                string responseString = await response.Content.ReadAsStringAsync();
-                XLoyaltyResponseCode responseCode = (XLoyaltyResponseCode)sbyte.Parse(responseString);
-                return responseCode;
-            }
-            // Bad request
-            else
-            {
-                return XLoyaltyResponseCode.Error;
-            }
+            string responseString = await response.Content.ReadAsStringAsync();
+            XLoyaltyResponseCode responseCode = (XLoyaltyResponseCode)sbyte.Parse(responseString);
+            return responseCode;
         }
+        return XLoyaltyResponseCode.Error; // Bad request
     }
 
-    // Add a button to submit username and to try again
-    public XLoyaltyFormBuilder AddSubmitTryAgainButton(Point location, Size size, IHost? host)
+    public XLoyaltyFormBuilder AddSubmitTryAgainButton(Point location, Size size, IHost? host) // Add button to submit username as a request to x api or to try again
     {
-        this.form.FormClosing += (sender, e) =>
-        { // Dispose the host before closing the form
-            host.Dispose();
-        };
-        // Create a submit try again button to submit a request to the x api for username search
-        submitTryAgainButton = new Button
+        form.FormClosing += (sender, e) => host.Dispose(); // Dispose the host before closing the form
+        submitTryAgainButton = new Button // Create the button
         {
             Text = "Go",
             Location = location,
@@ -243,32 +184,21 @@ public class XLoyaltyFormBuilder
             TextAlign = ContentAlignment.MiddleCenter
         };
         form.Controls.Add(submitTryAgainButton);
-        // Add an asynchronous event handler
-        submitTryAgainButton.Click += async (sender, e) =>
+        submitTryAgainButton.Click += async (sender, e) => // Add an asynchronous event handler
         {
-            // Disable the button right away to not lodge the pipeline
-            submitTryAgainButton.Enabled = false;
-            // Just hide the elon images
-            elonFrowningPictureBox.Visible = false;
-            elonSmilingPictureBox.Visible = false;
-            elonGoFYourselfPictureBox.Visible = false;
-            // X usernames are only supposed to be alphanumeric
-            if (usernameTextBox.Text.All(char.IsLetterOrDigit))
+            submitTryAgainButton.Enabled = false;  // Disable the button right away to not lodge the pipeline
+            UpdateElonMuskImages(false, false, false);
+            if (usernameTextBox.Text.All(c => char.IsLetterOrDigit(c) || c == '_')) // X usernames are only supposed to be alphanumeric or have an underscore
             {
-                // Obtain response code
-                XLoyaltyResponseCode response = await VerifyUsername(usernameTextBox.Text);
+                XLoyaltyResponseCode response = await VerifyUsername(usernameTextBox.Text); // Obtain response code
                 UpdateElonMuskImagesBasedOnResponse(response);
-                // Username exists, meaning we can access a following and followers list
-                if (response == XLoyaltyResponseCode.UsernameExists)
+                if (response == XLoyaltyResponseCode.UsernameExists) // Username exists, meaning we can access a following and followers list
                 {
-                    // Disable form
-                    form.Enabled = false;
-                    // Username exists, get lists of following and followers
-                    string responseString = await GetFollowingFollowersLists(usernameTextBox.Text);
+                    form.Enabled = false; // Disable form
+                    string responseString = await GetFollowingFollowersLists(usernameTextBox.Text); // Username exists, get lists of following and followers
                     AbstractFollowingFollowersListsToBuildFormLinks(responseString);
                     usernamesScrollablePanel.Visible = true;
-                    // Enable form
-                    form.Enabled = true;
+                    form.Enabled = true; // Enable form
                     form.BringToFront();
                 }
             }
@@ -278,33 +208,28 @@ public class XLoyaltyFormBuilder
             }
             submitTryAgainButton.Enabled = true;
         };
-        // Kill the host when you kill the form
-        form.FormClosed += async (sender, e) => await host.StopAsync();
+        form.FormClosed += async (sender, e) => await host.StopAsync(); // Kill the host when you kill the form
         return this;
     }
 
-    private int BuildFormLinksOfUsernamesYoureNotFollowingBack(List<string> usernameList)
+    private int BuildFormLinkButtonsOfUsernames(string title, int yLocation, List<string> usernameList)
     {
-        // Create the Who Youre Not Following Back label
-        Label youreNotFollowingBackLabel = new Label
+        Label titleLabel = new Label // Create the label
         {
-            Location = new Point(5, 0),
-            Text = "Who You're Not Following Back!",
+            Location = new Point(5, yLocation),
+            Text = title,
             ForeColor = Color.White,
             Width = 300,
             Height = 30
         };
-        usernamesScrollablePanel.Controls.Add(youreNotFollowingBackLabel);
-        // Set up positioning
-        int yLocation = 30;
+        usernamesScrollablePanel.Controls.Add(titleLabel);
+        yLocation += 30;
         int xLocation = 5;
-        // Map the usernames onto the scroll panel
-        int count = usernameList.Count();
+        int count = usernameList.Count(); // Map the usernames onto the scroll panel
         int index = count - usernameList.Count();
         while (index < count)
         {
-            // Create a new Button
-            Button button = new Button
+            Button button = new Button // Create a new Button
             {
                 Text = usernameList[index],
                 Location = new Point(xLocation, yLocation),
@@ -312,18 +237,14 @@ public class XLoyaltyFormBuilder
                 Size = new Size(120, 30),
                 BackColor = Color.IndianRed
             };
-            // Add a click event handler to the button
-            button.Click += (sender, args) =>
+            button.Click += (sender, args) => // Add a click event handler to the button
             {
-                // Open the default web browser
-                Process.Start(new ProcessStartInfo($"https://x.com/{button.Text}") { UseShellExecute = true });
+                Process.Start(new ProcessStartInfo($"https://x.com/{button.Text}") { UseShellExecute = true }); // Open the default web browser
                 Thread.Sleep(1000);
                 ((Button)sender).BackColor = Color.Green;
             };
-            // Add the button to the Panel
-            usernamesScrollablePanel.Controls.Add(button);
-            // Update the positioning for the following button
-            xLocation += 135;
+            usernamesScrollablePanel.Controls.Add(button); // Add the button to the Panel
+            xLocation += 135;  // Update the positioning for the following button
             if ((index + 1) % 3 == 0)
             {
                 xLocation = 5;
@@ -332,55 +253,6 @@ public class XLoyaltyFormBuilder
             index += 1;
         }
         return yLocation;
-    }
-
-    private void BuildFormLinksOfUsernamesNotFollowingYouBack(int yLocation, List<string> usernameList)
-    {
-        // Create the Whose not following you back label
-        Label notFollowingYouBackLabel = new Label
-        {
-            Location = new Point(5, yLocation),
-            Text = "Who IS Not Following You Back!",
-            ForeColor = Color.White,
-            Width = 300,
-            Height = 30
-        };
-        usernamesScrollablePanel.Controls.Add(notFollowingYouBackLabel);
-        // Setup the positioning
-        yLocation += 30;
-        int xLocation = 5;
-        int count = usernameList.Count();
-        int index = count - usernameList.Count();
-        while (index < count)
-        {
-            // Create a new Button
-            Button button = new Button
-            {
-                Text = usernameList[index],
-                Location = new Point(xLocation, yLocation),
-                ForeColor = Color.White,
-                Size = new Size(120, 30),
-                BackColor = Color.IndianRed
-            };
-            // Add a click event handler to the button
-            button.Click += (sender, args) =>
-            {
-                // Open Google in the default web browser
-                Process.Start(new ProcessStartInfo($"https://x.com/{button.Text}") { UseShellExecute = true });
-                Thread.Sleep(1000);
-                ((Button)sender).BackColor = Color.Green;
-            };
-            // Add the button to the Panel
-            usernamesScrollablePanel.Controls.Add(button);
-            // Update the positioning for the following button
-            xLocation += 135;
-            if ((index + 1) % 3 == 0)
-            {
-                xLocation = 5;
-                yLocation += 30;
-            }
-            index += 1;
-        }
     }
 
     private void AbstractFollowingFollowersListsToBuildFormLinks(string responseString)
@@ -440,11 +312,9 @@ public class XLoyaltyFormBuilder
 
             }
         }
-        int yPosition = BuildFormLinksOfUsernamesYoureNotFollowingBack(followersToFollowBack);
-        BuildFormLinksOfUsernamesNotFollowingYouBack(yPosition + 45, nonFollowersToUnFollow);
-        elonFrowningPictureBox.Visible = false;
-        elonSmilingPictureBox.Visible = false;
-        elonGoFYourselfPictureBox.Visible = false;
+        int yPosition = BuildFormLinkButtonsOfUsernames("Who You're Not Following Back!", 0, followersToFollowBack);
+        BuildFormLinkButtonsOfUsernames("Who Is Not Following You Back!", yPosition + 45, nonFollowersToUnFollow);
+        UpdateElonMuskImages(false, false, false);
     }
 
 
