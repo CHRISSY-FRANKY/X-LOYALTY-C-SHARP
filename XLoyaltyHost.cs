@@ -91,6 +91,8 @@ public class XLoyaltyHost
             d.FindElements(By.CssSelector(".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3")).Count > 1 &&
             ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState").Equals("complete")
         );
+        js.ExecuteScript("document.body.style.zoom='25%';");
+        Thread.Sleep((int)(randomDelay.NextSingle() * 3 + 2));
         Console.WriteLine("NAVIGATED TO FOLLOWING!");
         js = (IJavaScriptExecutor)webDriver;
         while (true) // Collect while scrolling
@@ -152,11 +154,11 @@ public class XLoyaltyHost
             ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState").Equals("complete")
         );
         Console.WriteLine("NAVIGATED TO FOLLOWERS!");
-
         List<string> usernames = []; // Collect username followers
         long currentScrollHeight = 0;
         long previousScrollHeight = 0;
         IJavaScriptExecutor js = (IJavaScriptExecutor)webDriver;
+        js.ExecuteScript("document.body.style.zoom='25%';");
         while (true) // Collect while scrolling
         {
             foreach (IWebElement element in webDriver.FindElements(By.CssSelector(".css-175oi2r.r-vacyoi.r-ttdzmv")))
@@ -210,7 +212,6 @@ public class XLoyaltyHost
                 MaximizeWebDriver(webDriver, waiter, randomDelay);
                 LoadSignInAndWaitForAuthentication(webDriver, waiter, username);
                 List<string> followers = LoadFollowersPageScrollAndExtractUniqueUsernames(webDriver, waiter, randomDelay, username);
-                Thread.Sleep((int)(randomDelay.NextSingle() * 2 + 1));
                 List<string> followings = LoadFollowingsPageScrollAndExtractUniqueUsernames(webDriver, waiter, randomDelay, username);
                 followersToFollowBack = GetFollowersImNonFollowing(followers, followings); // will contain followers user is not following to follow
                 nonFollowersToUnFollow = GetNonFollowersImFollowing(followers, followings); // will contain following not follower to unfollow
