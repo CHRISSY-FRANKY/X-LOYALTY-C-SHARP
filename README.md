@@ -47,3 +47,4 @@ Just me at the moment!
 - Handle the user interupting selenium at different parts of the control flow
 - Figure out how to package it into an .exe to use on any windows computer
 - Add a red border to unhandled usernames which later update to green once managed
+- Give the option for the user to enter their own bearer ID
