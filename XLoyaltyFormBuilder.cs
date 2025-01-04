@@ -199,7 +199,6 @@ public class XLoyaltyFormBuilder
                 return responseString;
             }
         }
-
     }
 
     // Setup method that tests endpoint to determine if a user exists
@@ -270,6 +269,7 @@ public class XLoyaltyFormBuilder
                     usernamesScrollablePanel.Visible = true;
                     // Enable form
                     form.Enabled = true;
+                    form.BringToFront();
                 }
             }
             else
@@ -307,13 +307,16 @@ public class XLoyaltyFormBuilder
                 Text = usernameList[index],
                 Location = new Point(xLocation, yLocation),
                 ForeColor = Color.White,
-                Size = new Size(120, 30)
+                Size = new Size(120, 30),
+                BackColor = Color.IndianRed
             };
             // Add a click event handler to the button
             button.Click += (sender, args) =>
             {
                 // Open the default web browser
                 Process.Start(new ProcessStartInfo($"https://x.com/{button.Text}") { UseShellExecute = true });
+                Thread.Sleep(1000);
+                ((Button)sender).BackColor = Color.Green;
             };
             // Add the button to the Panel
             usernamesScrollablePanel.Controls.Add(button);
@@ -352,13 +355,16 @@ public class XLoyaltyFormBuilder
                 Text = usernameList[index],
                 Location = new Point(xLocation, yLocation),
                 ForeColor = Color.White,
-                Size = new Size(120, 30)
+                Size = new Size(120, 30),
+                BackColor = Color.IndianRed
             };
             // Add a click event handler to the button
             button.Click += (sender, args) =>
             {
                 // Open Google in the default web browser
                 Process.Start(new ProcessStartInfo($"https://x.com/{button.Text}") { UseShellExecute = true });
+                Thread.Sleep(1000);
+                ((Button)sender).BackColor = Color.Green;
             };
             // Add the button to the Panel
             usernamesScrollablePanel.Controls.Add(button);
