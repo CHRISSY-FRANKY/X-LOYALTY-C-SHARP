@@ -41,11 +41,17 @@ Comming Soon! ^-^
 
 Just me at the moment!
 
+## Warning :warning:
+
+*Works smoothely if you don't have poopy internet*
+
+*If you're an actual software engineer, atm, you should be able set this up yourself without holding your hand*
+
 ## TO DO
 
+- Stop scraping / extraction once the individual username count has met the followers/followings count (to handle poopy internet)
 - Compartmentalize, refractor, and optimize code to be more efficient
 - Handle the user interupting selenium at different parts of the control flow
 - Figure out how to package it into an .exe to use on any windows computer
-- Add a red border to unhandled usernames which later update to green once managed
 - Give the option for the user to enter their own bearer ID
 - Replace the GUI for HTMX front end with an X.com THEME
