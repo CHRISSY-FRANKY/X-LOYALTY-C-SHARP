@@ -48,3 +48,4 @@ Just me at the moment!
 - Figure out how to package it into an .exe to use on any windows computer
 - Add a red border to unhandled usernames which later update to green once managed
 - Give the option for the user to enter their own bearer ID
+- Replace the GUI for HTMX front end with an X.com THEME
