@@ -147,6 +147,13 @@ public class XLoyaltyFormBuilder
         return this;
     }
 
+    private void UpdateElonMuskImages(bool frowning, bool smiling, bool goFYourself)
+    {
+        elonFrowningPictureBox.Visible = frowning;
+        elonSmilingPictureBox.Visible = smiling;
+        elonGoFYourselfPictureBox.Visible = goFYourself;
+    }
+
     // Returns whether or not to proceed to the next action after the username has been verified
     private void UpdateElonMuskImagesBasedOnResponse(XLoyaltyResponseCode response)
     {
@@ -154,26 +161,19 @@ public class XLoyaltyFormBuilder
         {
             // Show elon smiling
             case XLoyaltyResponseCode.UsernameExists:
-                elonFrowningPictureBox.Visible = false;
-                elonSmilingPictureBox.Visible = true;
-                elonGoFYourselfPictureBox.Visible = false;
+                UpdateElonMuskImages(false, true, false); // Only Show Elon Smiling Image
                 break;
             // Elon frowning
             case XLoyaltyResponseCode.UsernameNonExistant:
-                elonFrowningPictureBox.Visible = true;
-                elonSmilingPictureBox.Visible = false;
-                elonGoFYourselfPictureBox.Visible = false;
+                UpdateElonMuskImages(true, false, false); // Only Show Elon Frowning Image
                 break;
             // Elon telling you to go duck yourself
             case XLoyaltyResponseCode.RequestsLimited:
-                elonFrowningPictureBox.Visible = false;
-                elonSmilingPictureBox.Visible = false;
-                elonGoFYourselfPictureBox.Visible = true;
+                UpdateElonMuskImages(false, false, true); // Only Show Elon Go F Yourself Image
                 break;
-            // Something went horribly wrong through the pipeline
-            case XLoyaltyResponseCode.Error:
+            case XLoyaltyResponseCode.Error: // Something went horribly wrong through the pipeline
                 introLabel.Text = "Something went wrong on our end!";
-                Thread.Sleep(5000);
+                Thread.Sleep(3000);
                 Application.Exit();
                 break;
         }
@@ -286,7 +286,8 @@ public class XLoyaltyFormBuilder
     private int BuildFormLinksOfUsernamesYoureNotFollowingBack(List<string> usernameList)
     {
         // Create the Who Youre Not Following Back label
-        Label youreNotFollowingBackLabel = new Label {
+        Label youreNotFollowingBackLabel = new Label
+        {
             Location = new Point(5, 0),
             Text = "Who You're Not Following Back!",
             ForeColor = Color.White,
@@ -303,7 +304,8 @@ public class XLoyaltyFormBuilder
         while (index < count)
         {
             // Create a new Button
-            Button button = new Button{
+            Button button = new Button
+            {
                 Text = usernameList[index],
                 Location = new Point(xLocation, yLocation),
                 ForeColor = Color.White,
@@ -335,7 +337,8 @@ public class XLoyaltyFormBuilder
     private void BuildFormLinksOfUsernamesNotFollowingYouBack(int yLocation, List<string> usernameList)
     {
         // Create the Whose not following you back label
-        Label notFollowingYouBackLabel = new Label {
+        Label notFollowingYouBackLabel = new Label
+        {
             Location = new Point(5, yLocation),
             Text = "Who IS Not Following You Back!",
             ForeColor = Color.White,
@@ -351,7 +354,8 @@ public class XLoyaltyFormBuilder
         while (index < count)
         {
             // Create a new Button
-            Button button = new Button{
+            Button button = new Button
+            {
                 Text = usernameList[index],
                 Location = new Point(xLocation, yLocation),
                 ForeColor = Color.White,
