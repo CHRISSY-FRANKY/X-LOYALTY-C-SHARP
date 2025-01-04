@@ -148,7 +148,7 @@ public class XLoyaltyFormBuilder
     }
 
     // Returns whether or not to proceed to the next action after the username has been verified
-    private void UpdateElonMuskVisibility(XLoyaltyResponseCode response)
+    private void UpdateElonMuskImagesBasedOnResponse(XLoyaltyResponseCode response)
     {
         switch (response)
         {
@@ -257,7 +257,7 @@ public class XLoyaltyFormBuilder
             {
                 // Obtain response code
                 XLoyaltyResponseCode response = await VerifyUsername(usernameTextBox.Text);
-                UpdateElonMuskVisibility(response);
+                UpdateElonMuskImagesBasedOnResponse(response);
                 // Username exists, meaning we can access a following and followers list
                 if (response == XLoyaltyResponseCode.UsernameExists)
                 {
