@@ -410,9 +410,8 @@ public class XLoyaltyFormBuilder
             // Traversing List, Searches for username
             else if (isTraversingList)
             {
-
                 // Username found
-                if (!isTraversingUsername && Char.IsAsciiLetter(currentChar))
+                if (!isTraversingUsername && (Char.IsAsciiLetterOrDigit(currentChar) || currentChar == '_'))
                 {
                     isTraversingUsername = true;
                 }
