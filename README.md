@@ -43,12 +43,7 @@ Just me at the moment!
 
 ## TO DO
 
-- Refractor parts of the code to be more efficient
-- Handle the user interupting selenium
+- Compartmentalize, refractor, and optimize code to be more efficient
+- Handle the user interupting selenium at different parts of the control flow
 - Figure out how to package it into an .exe to use on any windows computer
-
-## Disclaimer :wink:
-
-The beta version will be hosted somewhere and be provided an htmx front end
-
-The final version will be hosted on Azure and will offer an htmx front end
+- Add a red border to unhandled usernames which later update to green once managed
