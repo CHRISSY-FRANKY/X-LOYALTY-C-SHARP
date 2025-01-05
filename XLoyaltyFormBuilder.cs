@@ -21,15 +21,8 @@ public class XLoyaltyFormBuilder
 
     public XLoyaltyFormBuilder AddIntroLabel(Point location, Size size) // Creates and adds intro label to Form
     {
-        introLabel = new Label
-        {
-            Text = "\nWelcome to X LOYALTY!\nEnter an X account username (alphanumeric)\nto determine if it exists or not!",
-            Location = location,
-            Size = size,
-            BackColor = Color.Black,
-            ForeColor = Color.White,
-            TextAlign = System.Drawing.ContentAlignment.TopCenter
-        };
+        string text = "\nWelcome to X LOYALTY!\nEnter an X account username (alphanumeric)\nto determine if it exists or not!";
+        introLabel = new WinFormsLabelBuilder().SetText(text).SetLocation(location).SetSize(size).SetBackColor(Color.Black).SetForeColor(Color.White).SetTextAlign(ContentAlignment.TopCenter);
         form.Controls.Add(introLabel);
         return this;
     }
@@ -223,14 +216,7 @@ public class XLoyaltyFormBuilder
 
     private int BuildFormLinkButtonsOfUsernames(string title, int yLocation, string[] usernameList)
     {
-        Label titleLabel = new Label // Create the label
-        {
-            Location = new Point(5, yLocation),
-            Text = title,
-            ForeColor = Color.White,
-            Width = 300,
-            Height = 30
-        };
+        Label titleLabel = new WinFormsLabelBuilder().SetLocation(new Point(5, yLocation)).SetText(title).SetForeColor(Color.White).SetWidth(300).SetHeight(30);
         usernamesScrollablePanel.Controls.Add(titleLabel);
         yLocation += 30;
         int xLocation = 5;
