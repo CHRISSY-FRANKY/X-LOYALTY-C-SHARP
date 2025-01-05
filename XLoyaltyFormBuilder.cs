@@ -61,12 +61,7 @@ public class XLoyaltyFormBuilder
 
     public XLoyaltyFormBuilder AddUsernamesScrollPanel() // Create and add usernames scrollable panel
     {
-        usernamesScrollablePanel = new Panel
-        {
-            Location = new Point(0, 175),
-            Size = new Size(420, 200),
-            AutoScroll = true,
-        };
+        usernamesScrollablePanel = new WinFormsPanelBuilder().SetLocation(new Point(0, 175)).SetSize(new Size(420, 200)).SetAutoScroll(true);
         form.Controls.Add(usernamesScrollablePanel);
         return this;
     }
