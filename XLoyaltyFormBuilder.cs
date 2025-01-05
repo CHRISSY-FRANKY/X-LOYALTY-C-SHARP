@@ -29,15 +29,8 @@ public class XLoyaltyFormBuilder
 
     public XLoyaltyFormBuilder AddUsernameTextBox(Point location, Size size) // Creates and adds username text box to form
     {
-        usernameTextBox = new()
-        {
-            Text = "Enter Username Here!",
-            Location = location,
-            Size = size,
-            BackColor = Color.White,
-            ForeColor = Color.Black,
-            TextAlign = HorizontalAlignment.Center
-        };
+        string text = "Enter Username Here!";
+        usernameTextBox = new WinFormsTextBoxBuilder().SetText(text).SetLocation(location).SetSize(size).SetBackColor(Color.White).SetForeColor(Color.Black).SetTextAlign(HorizontalAlignment.Center);
         form.Controls.Add(usernameTextBox);
         return this;
     }
