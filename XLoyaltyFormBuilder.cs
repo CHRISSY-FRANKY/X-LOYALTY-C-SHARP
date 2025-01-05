@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Hosting;
 using System.Diagnostics;
 using System.Text;
+using System.Windows.Forms.VisualStyles;
 
 public class XLoyaltyFormBuilder
 {
@@ -37,7 +38,7 @@ public class XLoyaltyFormBuilder
             Size = size,
             BackColor = Color.Black,
             ForeColor = Color.White,
-            TextAlign = ContentAlignment.TopCenter
+            TextAlign = System.Drawing.ContentAlignment.TopCenter
         };
         form.Controls.Add(introLabel);
         return this;
@@ -171,6 +172,18 @@ public class XLoyaltyFormBuilder
         return XLoyaltyResponseCode.Error; // Bad request
     }
 
+    private string[] GetListOfUsernamesYoureNotFollowingBack(string usernamesString)
+    {
+        int index = usernamesString.IndexOf('[');
+        return usernamesString.Substring(index + 1).Replace('\"', ' ').Replace('\\', ' ').Split(",");
+    }
+
+    private string[] GetListOfUsernamesNotFollowingYouBack(string usernamesString)
+    {
+        int index = usernamesString.IndexOf('[');
+        return usernamesString.Substring(index + 2, usernamesString.Length - 12).Replace('\"', ' ').Replace('\\', ' ').Split(",");
+    }
+
     public XLoyaltyFormBuilder AddSubmitTryAgainButton(Point location, Size size, IHost? host) // Add button to submit username as a request to x api or to try again
     {
         form.FormClosing += (sender, e) => host.Dispose(); // Dispose the host before closing the form
@@ -181,7 +194,7 @@ public class XLoyaltyFormBuilder
             Size = size,
             BackColor = Color.White,
             ForeColor = Color.Black,
-            TextAlign = ContentAlignment.MiddleCenter
+            TextAlign = System.Drawing.ContentAlignment.BottomCenter
         };
         form.Controls.Add(submitTryAgainButton);
         submitTryAgainButton.Click += async (sender, e) => // Add an asynchronous event handler
@@ -196,7 +209,13 @@ public class XLoyaltyFormBuilder
                 {
                     form.Enabled = false; // Disable form
                     string responseString = await GetFollowingFollowersLists(usernameTextBox.Text); // Username exists, get lists of following and followers
-                    AbstractFollowingFollowersListsToBuildFormLinks(responseString);
+                    Console.WriteLine(responseString);
+                    string[] usernamesStrings =  responseString.Split("],"); // Separate the response string into two lists
+                    string[] usernamesYoureNotFollowingBack = GetListOfUsernamesYoureNotFollowingBack(usernamesStrings[0]);
+                    string[] usernamesNotFollowingYouBack = GetListOfUsernamesNotFollowingYouBack(usernamesStrings[1]);
+                    int yPosition = BuildFormLinkButtonsOfUsernames("Who You're Not Following Back!", 0, usernamesYoureNotFollowingBack);
+                    BuildFormLinkButtonsOfUsernames("Who Is Not Following You Back!", yPosition + 45, usernamesNotFollowingYouBack);
+                    UpdateElonMuskImages(false, false, false);
                     usernamesScrollablePanel.Visible = true;
                     form.Enabled = true; // Enable form
                     form.BringToFront();
@@ -212,7 +231,7 @@ public class XLoyaltyFormBuilder
         return this;
     }
 
-    private int BuildFormLinkButtonsOfUsernames(string title, int yLocation, List<string> usernameList)
+    private int BuildFormLinkButtonsOfUsernames(string title, int yLocation, string[] usernameList)
     {
         Label titleLabel = new Label // Create the label
         {
@@ -239,7 +258,7 @@ public class XLoyaltyFormBuilder
             };
             button.Click += (sender, args) => // Add a click event handler to the button
             {
-                Process.Start(new ProcessStartInfo($"https://x.com/{button.Text}") { UseShellExecute = true }); // Open the default web browser
+                Process.Start(new ProcessStartInfo($"https://x.com/{button.Text.Trim()}") { UseShellExecute = true }); // Open the default web browser
                 Thread.Sleep(1000);
                 ((Button)sender).BackColor = Color.Green;
             };
@@ -254,70 +273,6 @@ public class XLoyaltyFormBuilder
         }
         return yLocation;
     }
-
-    private void AbstractFollowingFollowersListsToBuildFormLinks(string responseString)
-    {
-        // Get rid of the dictionary symbols
-        responseString = responseString.Substring(1, responseString.Length - 2);
-        responseString = responseString.Replace("\\", "").Replace("\"", "");
-        // Keep track of the list and username
-        bool isTraversingList = false;
-        bool isTraversingUsername = false;
-        bool isFirstList = true;
-        // Save the usernames in each of their respective lists
-        List<string> followersToFollowBack = [];
-        List<string> nonFollowersToUnFollow = [];
-        StringBuilder currentUsername = new StringBuilder();
-        for (int i = 0; i < responseString.Length; i++)
-        {
-            char currentChar = responseString.ElementAt(i);
-            // Searches for list
-            if (!isTraversingList && currentChar == '[')
-            {
-                // List found
-                isTraversingList = true;
-            }
-            else if (isTraversingList && currentChar == ']')
-            {
-                currentUsername.Clear();
-                isTraversingList = false;
-                isFirstList = false;
-            }
-            // Traversing List, Searches for username
-            else if (isTraversingList)
-            {
-                // Username found
-                if (!isTraversingUsername && (Char.IsAsciiLetterOrDigit(currentChar) || currentChar == '_'))
-                {
-                    isTraversingUsername = true;
-                }
-                // Username has ended
-                else if (isTraversingUsername && currentChar == ',')
-                {
-                    isTraversingUsername = false;
-                    if (isFirstList)
-                    {
-                        followersToFollowBack.Add(currentUsername.ToString());
-                    }
-                    else
-                    {
-                        nonFollowersToUnFollow.Add(currentUsername.ToString());
-                    }
-                    currentUsername.Clear();
-                }
-                if (isTraversingUsername)
-                {
-                    currentUsername.Append(currentChar);
-                }
-
-            }
-        }
-        int yPosition = BuildFormLinkButtonsOfUsernames("Who You're Not Following Back!", 0, followersToFollowBack);
-        BuildFormLinkButtonsOfUsernames("Who Is Not Following You Back!", yPosition + 45, nonFollowersToUnFollow);
-        UpdateElonMuskImages(false, false, false);
-    }
-
-
     public XLoyaltyFormBuilder Run()
     {
         Application.Run(form);
