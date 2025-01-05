@@ -15,8 +15,7 @@ public class XLoyaltyHost
     private IHost builtHost;
     public XLoyaltyHost(string[] args, ushort port, string keysFile)
     {
-        hostBuilder = Host.CreateDefaultBuilder(args)
-        .ConfigureWebHostDefaults(webBuilder =>
+        hostBuilder = Host.CreateDefaultBuilder(args).ConfigureWebHostDefaults(webBuilder =>
         {
             ConfigureUrls(webBuilder, port);
             ConfigureApplication(webBuilder, keysFile);
@@ -38,8 +37,7 @@ public class XLoyaltyHost
     {
         webBuilder.ConfigureAppConfiguration((hostingContext, config) =>
         {
-            // Add external file
-            config.AddJsonFile(keysFile, optional: false, reloadOnChange: true);
+            config.AddJsonFile(keysFile, optional: false, reloadOnChange: true);  // Add external file
         });
     }
 
@@ -61,19 +59,19 @@ public class XLoyaltyHost
         waiter.Until(d => ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState").Equals("complete")); // Wait for the driver to load
         Thread.Sleep((int)(randomDelay.NextSingle() * 2 + 1));
         webDriver.Manage().Window.Maximize(); // Maximize the browser for a better experience
-        Console.WriteLine("WEB DRIVER MAXIMIZED!");
+        // Console.WriteLine("WEB DRIVER MAXIMIZED!");
     }
 
     private static void LoadSignInAndWaitForAuthentication(IWebDriver webDriver, WebDriverWait waiter, string username) // Loads the sign in page and waits for the user to sign in
     {
         webDriver.Navigate().GoToUrl($"https://x.com/i/flow/login?redirect_after_login=%2F{username}"); // Have the user sign in
         waiter.Until(d => d.Url.Contains($"https://x.com/i/flow/login?redirect_after_login=%2F{username}")); // Wait for sign in page to load
-        Console.WriteLine("USER IS TRYING TO SIGN IN!");
+        // Console.WriteLine("USER IS TRYING TO SIGN IN!");
         waiter.Until(d => d.Url.Contains($"https://x.com/{username}?mx=2")); // Wait for the user to sign in
-        Console.WriteLine("USER SIGNED IN!");
+        // Console.WriteLine("USER SIGNED IN!");
     }
 
-    private static List<string> LoadPageScrollAndExtractUniqueUsernames(IWebDriver webDriver, string pageToLoad, WebDriverWait waiter, Random randomDelay, string username)
+    private static List<string> LoadPageScrollAndExtractUniqueUsernames(IWebDriver webDriver, string pageToLoad, WebDriverWait waiter, Random randomDelay)
     {
         List<string> usernames = []; // Collect username followers
         long currentScrollHeight = 0;
@@ -84,7 +82,7 @@ public class XLoyaltyHost
             d.FindElements(By.CssSelector(".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3")).Count > 1 &&
             ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState").Equals("complete")
         );
-        Console.WriteLine("NAVIGATED TO PAGE! " + pageToLoad);
+        // Console.WriteLine("NAVIGATED TO PAGE! " + pageToLoad);
         IJavaScriptExecutor js = (IJavaScriptExecutor)webDriver;
         js.ExecuteScript("document.body.style.zoom='25%';");
         Thread.Sleep((int)(randomDelay.NextSingle() * 2 + 2));
@@ -101,8 +99,7 @@ public class XLoyaltyHost
                 string text;
                 try
                 {
-                    string cssColorValue = element.GetCssValue("color");
-                    if (cssColorValue == "rgb(29, 155, 240)") // Skip the usernames from bios
+                    if (element.GetCssValue("color") == "rgb(29, 155, 240)") // Skip the usernames from bios
                     {
                         continue;
                     }
@@ -112,14 +109,12 @@ public class XLoyaltyHost
                         usernames.Add(text.Substring(1));
                     }
                 }
-                catch (StaleElementReferenceException e)
+                catch (StaleElementReferenceException)
                 {
-                    Console.WriteLine(e.StackTrace);
                     continue;
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    Console.WriteLine(e.StackTrace);
                     continue;
                 }
             }
@@ -158,8 +153,8 @@ public class XLoyaltyHost
             {
                 MaximizeWebDriver(webDriver, waiter, randomDelay);
                 LoadSignInAndWaitForAuthentication(webDriver, waiter, username);
-                List<string> followers = LoadPageScrollAndExtractUniqueUsernames(webDriver, $"https://x.com/{username}/followers", waiter, randomDelay, username);
-                List<string> followings = LoadPageScrollAndExtractUniqueUsernames(webDriver, $"https://x.com/{username}/following", waiter, randomDelay, username);
+                List<string> followers = LoadPageScrollAndExtractUniqueUsernames(webDriver, $"https://x.com/{username}/followers", waiter, randomDelay);
+                List<string> followings = LoadPageScrollAndExtractUniqueUsernames(webDriver, $"https://x.com/{username}/following", waiter, randomDelay);
                 followersToFollowBack = GetSetDifference(followers, followings); // will contain followers user is not following to follow
                 nonFollowersToUnFollow = GetSetDifference(followings, followers); // will contain following not follower to unfollow
                 followersToFollowUnfollow.Add(0, followersToFollowBack);
