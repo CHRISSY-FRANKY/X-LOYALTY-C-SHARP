@@ -49,7 +49,6 @@ Just me at the moment!
 
 ## TO DO
 
-- Stop scraping / extraction once the individual username count has met the followers/followings count (to handle poopy internet)
 - Compartmentalize, refractor, and optimize code to be more efficient
 - Handle the user interupting selenium at different parts of the control flow
 - Figure out how to package it into an .exe to use on any windows computer
