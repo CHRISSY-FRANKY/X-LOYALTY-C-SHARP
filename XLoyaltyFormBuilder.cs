@@ -8,7 +8,7 @@ public class XLoyaltyFormBuilder
     private TextBox usernameTextBox;
     private PictureBox elonFrowningPictureBox;
     private PictureBox elonSmilingPictureBox;
-    private PictureBox elonGoFYourselfPictureBox;
+    private PictureBox elonGoFUrselfPictureBox;
     private Button submitTryAgainButton;
     private Panel usernamesScrollablePanel;
 
@@ -37,14 +37,7 @@ public class XLoyaltyFormBuilder
 
     public XLoyaltyFormBuilder AddElonSmilingPictureBox(string fileName, Point location, Size size) // Create and add Elon Smiling Picture Box
     {
-        elonSmilingPictureBox = new PictureBox
-        {
-            Image = Image.FromFile(fileName),
-            Location = location,
-            Size = size,
-            SizeMode = PictureBoxSizeMode.Zoom,
-            Visible = false
-        };
+        elonSmilingPictureBox = new WinFormsPictureBoxBuilder().SetImage(Image.FromFile(fileName)).SetLocation(location).SetSize(size).SetSizeMode(PictureBoxSizeMode.Zoom).SetVisible(false);
         form.Controls.Add(elonSmilingPictureBox);
         usernameTextBox.Click += (sender, e) => elonSmilingPictureBox.Visible = false; // Picture box is hidden when username text box is re activated
         return this;
@@ -52,14 +45,7 @@ public class XLoyaltyFormBuilder
 
     public XLoyaltyFormBuilder AddElonFrowningPictureBox(string fileName, Point location, Size size) // Create and add elon frowning picture box
     {
-        elonFrowningPictureBox = new PictureBox
-        {
-            Image = Image.FromFile(fileName),
-            Location = location,
-            Size = size,
-            SizeMode = PictureBoxSizeMode.Zoom,
-            Visible = false
-        };
+        elonFrowningPictureBox = new WinFormsPictureBoxBuilder().SetImage(Image.FromFile(fileName)).SetLocation(location).SetSize(size).SetSizeMode(PictureBoxSizeMode.Zoom).SetVisible(false);
         form.Controls.Add(elonFrowningPictureBox);
         usernameTextBox.Click += (sender, e) => elonFrowningPictureBox.Visible = false; // Picture box is hidden when username text box is re activated
         return this;
@@ -67,16 +53,9 @@ public class XLoyaltyFormBuilder
 
     public XLoyaltyFormBuilder AddElonGoFYourselfPictureBox(string fileName, Point location, Size size) // Create and add Elon Go F yourself picture box
     {
-        elonGoFYourselfPictureBox = new PictureBox
-        {
-            Image = Image.FromFile(fileName),
-            Location = location,
-            Size = size,
-            SizeMode = PictureBoxSizeMode.Zoom,
-            Visible = false
-        };
-        form.Controls.Add(elonGoFYourselfPictureBox);
-        usernameTextBox.Click += (sender, e) => elonGoFYourselfPictureBox.Visible = false; // Picture box is hidden when username text box is re activated
+        elonGoFUrselfPictureBox = new WinFormsPictureBoxBuilder().SetImage(Image.FromFile(fileName)).SetLocation(location).SetSize(size).SetSizeMode(PictureBoxSizeMode.Zoom).SetVisible(false);
+        form.Controls.Add(elonGoFUrselfPictureBox);
+        usernameTextBox.Click += (sender, e) => elonGoFUrselfPictureBox.Visible = false; // Picture box is hidden when username text box is re activated
         return this;
     }
 
@@ -96,7 +75,7 @@ public class XLoyaltyFormBuilder
     {
         elonFrowningPictureBox.Visible = frowning;
         elonSmilingPictureBox.Visible = smiling;
-        elonGoFYourselfPictureBox.Visible = goFYourself;
+        elonGoFUrselfPictureBox.Visible = goFYourself;
     }
 
     private void UpdateElonMuskImagesBasedOnResponse(XLoyaltyResponseCode response)
