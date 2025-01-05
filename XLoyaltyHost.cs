@@ -87,7 +87,6 @@ public class XLoyaltyHost
         Console.WriteLine("NAVIGATED TO PAGE! " + pageToLoad);
         IJavaScriptExecutor js = (IJavaScriptExecutor)webDriver;
         js.ExecuteScript("document.body.style.zoom='25%';");
-
         Thread.Sleep((int)(randomDelay.NextSingle() * 2 + 2));
         bool finalScrape = false;
         while (true) // Collect while scrolling
@@ -205,14 +204,11 @@ public class XLoyaltyHost
                 {
                     return Results.Ok(XLoyaltyResponseCode.RequestsLimited);
                 }
-                else if (rootJsonElement.TryGetProperty("data", out var prop)) // Username exists
+                if (rootJsonElement.TryGetProperty("data", out var prop)) // Username exists
                 {
                     return Results.Ok(XLoyaltyResponseCode.UsernameExists);
                 }
-                else // Username doesn't exist
-                {
-                    return Results.Ok(XLoyaltyResponseCode.UsernameNonExistant);
-                }
+                return Results.Ok(XLoyaltyResponseCode.UsernameNonExistant); // Username doesn't exist
             }
             catch (HttpRequestException)
             {
