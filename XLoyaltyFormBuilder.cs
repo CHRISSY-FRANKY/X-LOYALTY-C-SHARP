@@ -137,15 +137,7 @@ public class XLoyaltyFormBuilder
     public XLoyaltyFormBuilder AddSubmitTryAgainButton(Point location, Size size, IHost? host) // Add button to submit username as a request to x api or to try again
     {
         form.FormClosing += (sender, e) => host.Dispose(); // Dispose the host before closing the form
-        submitTryAgainButton = new Button // Create the button
-        {
-            Text = "Go",
-            Location = location,
-            Size = size,
-            BackColor = Color.White,
-            ForeColor = Color.Black,
-            TextAlign = System.Drawing.ContentAlignment.BottomCenter
-        };
+        submitTryAgainButton = new WinFormsButtonBuilder().SetText("GO").SetLocation(location).SetSize(size).SetBackColor(Color.White).SetForeColor(Color.Black).SetTextAlign(ContentAlignment.BottomCenter);
         form.Controls.Add(submitTryAgainButton);
         submitTryAgainButton.Click += async (sender, e) => // Add an asynchronous event handler
         {
@@ -191,14 +183,7 @@ public class XLoyaltyFormBuilder
         int index = count - usernameList.Count();
         while (index < count)
         {
-            Button button = new Button // Create a new Button
-            {
-                Text = usernameList[index],
-                Location = new Point(xLocation, yLocation),
-                ForeColor = Color.White,
-                Size = new Size(120, 30),
-                BackColor = Color.IndianRed
-            };
+            Button button = new WinFormsButtonBuilder().SetText(usernameList[index]).SetLocation(new Point(xLocation, yLocation)).SetSize(new Size(120, 30)).SetBackColor(Color.IndianRed).SetForeColor(Color.White);
             button.Click += (sender, args) => // Add a click event handler to the button
             {
                 Process.Start(new ProcessStartInfo($"https://x.com/{button.Text.Trim()}") { UseShellExecute = true }); // Open the default web browser
