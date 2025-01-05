@@ -87,7 +87,7 @@ public class XLoyaltyHost
         Console.WriteLine("NAVIGATED TO PAGE! " + pageToLoad);
         IJavaScriptExecutor js = (IJavaScriptExecutor)webDriver;
         js.ExecuteScript("document.body.style.zoom='25%';");
-       
+
         Thread.Sleep((int)(randomDelay.NextSingle() * 2 + 2));
         bool finalScrape = false;
         while (true) // Collect while scrolling
@@ -161,8 +161,8 @@ public class XLoyaltyHost
                 LoadSignInAndWaitForAuthentication(webDriver, waiter, username);
                 List<string> followers = LoadPageScrollAndExtractUniqueUsernames(webDriver, $"https://x.com/{username}/followers", waiter, randomDelay, username);
                 List<string> followings = LoadPageScrollAndExtractUniqueUsernames(webDriver, $"https://x.com/{username}/following", waiter, randomDelay, username);
-                followersToFollowBack = GetFollowersImNonFollowing(followers, followings); // will contain followers user is not following to follow
-                nonFollowersToUnFollow = GetNonFollowersImFollowing(followers, followings); // will contain following not follower to unfollow
+                followersToFollowBack = GetSetDifference(followers, followings); // will contain followers user is not following to follow
+                nonFollowersToUnFollow = GetSetDifference(followings, followers); // will contain following not follower to unfollow
                 followersToFollowUnfollow.Add(0, followersToFollowBack);
                 followersToFollowUnfollow.Add(1, nonFollowersToUnFollow);
             }
@@ -183,79 +183,40 @@ public class XLoyaltyHost
         }).WithName("FollowingFollowersLists");
     }
 
-    private static List<string> GetFollowersImNonFollowing(List<string> followers, List<string> followings)
+    private static List<string> GetSetDifference(List<string> usernamesLeft, List<string> usernamesRight) // Basically Left XOR
     {
-        List<string> followersImNotFollowing = [];
-        foreach (string follower in followers)
-        {
-            if (!followings.Contains(follower))
-            {
-                followersImNotFollowing.Add(follower);
-            }
-        }
-        return followersImNotFollowing;
-    }
-
-    private static List<string> GetNonFollowersImFollowing(List<string> followers, List<string> followings)
-    {
-        List<string> nonFollowersImFollowing = [];
-        foreach (string following in followings)
-        {
-            if (!followers.Contains(following))
-            {
-                nonFollowersImFollowing.Add(following);
-            }
-        }
-        return nonFollowersImFollowing;
+        return usernamesLeft.Except(usernamesRight).ToList();
     }
 
     private static void ConfigureVerifyUsernameEndpoint(IEndpointRouteBuilder endpoints)
     {
-        // Verify Username Endpoint
-        endpoints.MapGet("/VerifyUsername", async (string username, IConfiguration configuration, HttpResponse response) =>
+        endpoints.MapGet("/VerifyUsername", async (string username, IConfiguration configuration, HttpResponse response) => // Verify Username Endpoint
         {
             try
             {
-                // Setup http client
-                using var httpClient = new HttpClient();
-                // Save the bearer token
-                string bearerToken = configuration["BearerToken"];
-                // Add the authorization header
-                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
-                // Build the url to request the existence of the username provided
-                string url = $"https://api.twitter.com/2/users/by/username/{username}";
-                //Console.WriteLine(bearerToken); Checking configuration settings
-                //Console.WriteLine(url); Checking ur
-                // Make the custom request
-                HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(url);
-                // Get the response body
-                string responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
-                // Parse the response body into a json
-                var jsonDocument = JsonDocument.Parse(responseBody);
+                using var httpClient = new HttpClient(); // Setup http client
+                string bearerToken = configuration["BearerToken"]; // Save the bearer token
+                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken); // Add the authorization header
+                HttpResponseMessage httpResponseMessage = await httpClient.GetAsync($"https://api.twitter.com/2/users/by/username/{username}"); // Make request
+                string responseBody = await httpResponseMessage.Content.ReadAsStringAsync(); // Get the response body
+                var jsonDocument = JsonDocument.Parse(responseBody);  // Parse the response body into a json
                 JsonElement rootJsonElement = jsonDocument.RootElement;
-                // Too many requests
-                if (rootJsonElement.TryGetProperty("title", out var property))
+                if (rootJsonElement.TryGetProperty("title", out var property)) // Too many requests
                 {
-                    //Console.WriteLine(property.ToString());
                     return Results.Ok(XLoyaltyResponseCode.RequestsLimited);
-
                 }
-                // Username exists
-                else if (rootJsonElement.TryGetProperty("data", out var prop))
+                else if (rootJsonElement.TryGetProperty("data", out var prop)) // Username exists
                 {
                     return Results.Ok(XLoyaltyResponseCode.UsernameExists);
                 }
-                // Username doesn't exist
-                else
+                else // Username doesn't exist
                 {
-
                     return Results.Ok(XLoyaltyResponseCode.UsernameNonExistant);
                 }
             }
             catch (HttpRequestException)
             {
-                // Something went horribly wrong on our end
-                return Results.BadRequest();
+                return Results.BadRequest(); // Something went horribly wrong on our end
             }
         }).WithName("VerifyUsername");
     }
