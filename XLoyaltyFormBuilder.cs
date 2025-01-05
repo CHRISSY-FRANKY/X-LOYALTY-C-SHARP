@@ -1,7 +1,5 @@
 using Microsoft.Extensions.Hosting;
 using System.Diagnostics;
-using System.Text;
-using System.Windows.Forms.VisualStyles;
 
 public class XLoyaltyFormBuilder
 {
@@ -18,20 +16,12 @@ public class XLoyaltyFormBuilder
     {
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
-        form = new Form  // Create form based on arguments provided
-        {
-            Text = "X LOYALTY",
-            MaximizeBox = false,
-            MinimizeBox = false,
-            FormBorderStyle = FormBorderStyle.FixedSingle,
-            BackColor = Color.Black,
-            Size = formSize
-        };
+        form = new WinFormsFormBuilder().SetText("X LOYALTY").SetMaximizeBox(false).SetMinimizeBox(false).setFormBorderStyle(FormBorderStyle.FixedSingle).setBackColor(Color.Black).setSize(formSize);
     }
 
     public XLoyaltyFormBuilder AddIntroLabel(Point location, Size size) // Creates and adds intro label to Form
     {
-        introLabel = new()
+        introLabel = new Label
         {
             Text = "\nWelcome to X LOYALTY!\nEnter an X account username (alphanumeric)\nto determine if it exists or not!",
             Location = location,
@@ -70,7 +60,7 @@ public class XLoyaltyFormBuilder
             Visible = false
         };
         form.Controls.Add(elonSmilingPictureBox);
-        usernameTextBox.Click += (sender, e) =>  elonSmilingPictureBox.Visible = false; // Picture box is hidden when username text box is re activated
+        usernameTextBox.Click += (sender, e) => elonSmilingPictureBox.Visible = false; // Picture box is hidden when username text box is re activated
         return this;
     }
 
@@ -85,7 +75,7 @@ public class XLoyaltyFormBuilder
             Visible = false
         };
         form.Controls.Add(elonFrowningPictureBox);
-        usernameTextBox.Click += (sender, e) =>  elonFrowningPictureBox.Visible = false; // Picture box is hidden when username text box is re activated
+        usernameTextBox.Click += (sender, e) => elonFrowningPictureBox.Visible = false; // Picture box is hidden when username text box is re activated
         return this;
     }
 
@@ -123,7 +113,7 @@ public class XLoyaltyFormBuilder
         elonGoFYourselfPictureBox.Visible = goFYourself;
     }
 
-    private void UpdateElonMuskImagesBasedOnResponse(XLoyaltyResponseCode response) 
+    private void UpdateElonMuskImagesBasedOnResponse(XLoyaltyResponseCode response)
     {
         switch (response)
         {
@@ -210,7 +200,7 @@ public class XLoyaltyFormBuilder
                     form.Enabled = false; // Disable form
                     string responseString = await GetFollowingFollowersLists(usernameTextBox.Text); // Username exists, get lists of following and followers
                     Console.WriteLine(responseString);
-                    string[] usernamesStrings =  responseString.Split("],"); // Separate the response string into two lists
+                    string[] usernamesStrings = responseString.Split("],"); // Separate the response string into two lists
                     string[] usernamesYoureNotFollowingBack = GetListOfUsernamesYoureNotFollowingBack(usernamesStrings[0]);
                     string[] usernamesNotFollowingYouBack = GetListOfUsernamesNotFollowingYouBack(usernamesStrings[1]);
                     int yPosition = BuildFormLinkButtonsOfUsernames("Who You're Not Following Back!", 0, usernamesYoureNotFollowingBack);
