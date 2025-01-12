@@ -51,3 +51,7 @@ h1 {
 h2 {
   font-size: 4vh;
 }
+
+input[type="text"]::placeholder {
+  text-align: center;
+}
