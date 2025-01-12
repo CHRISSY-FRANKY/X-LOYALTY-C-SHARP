@@ -1,6 +1,12 @@
 body {
   background-color: black;
   margin: 0; /* remove unused space */
+
+  font-family: "Libre Franklin", sans-serif; /* x.com base font */
+  color: white;
+  
+  display: flex;
+  flex-direction: row;
 }
 
 header {
@@ -14,15 +20,34 @@ header {
 
 img {
   object-fit: contain; /* maintain aspect ratio */
-  max-block-size: 33vh;
+  max-width: 33vh;
+  max-height: 33vh;
 }
-
-h1 {
-  font-family: "Libre Franklin", sans-serif; /* x.com base font */
-  color: white;
-}
-
 header.viewport-less-than-screen { /* adujust for minimized window */
   width: 100vw;
   height: auto;
+  padding-top: 1vh;
+}
+
+form.viewport-less-than-screen {
+  width: 100vw;
+  height: auto;
+  padding-top: 1vh;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 50vw;
+  height: 100vh;
+}
+
+h1 {
+  font-size: 7vh;
+}
+
+h2 {
+  font-size: 4vh;
 }
