@@ -1,7 +1,23 @@
 body {
-    background-color: black;
+  background-color: black;
+  margin: 0; /* remove unused space */
+}
+
+header {
+  display: flex; /* is now a flex container */
+  flex-direction: column; /* a column flex container */
+  align-items: center; /* center horizontally */
+  justify-content: center; /* center vertically */
+  width: 50vw;
+  height: 100vh;
+}
+
+img {
+  object-fit: contain; /* maintain aspect ratio */
+  max-block-size: 33vh;
 }
 
 h1 {
-    color: white;
+  font-family: "Libre Franklin", sans-serif; /* x.com base font */
+  color: white;
 }
