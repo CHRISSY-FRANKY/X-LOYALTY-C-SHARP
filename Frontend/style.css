@@ -21,3 +21,8 @@ h1 {
   font-family: "Libre Franklin", sans-serif; /* x.com base font */
   color: white;
 }
+
+header.viewport-less-than-screen { /* adujust for minimized window */
+  width: 100vw;
+  height: auto;
+}
