@@ -1,3 +1,10 @@
+THIS REPO WILL BE REWRITTEN IN JAVA SINCE [AWS LEADS](https://www.bing.com/search?q=aws+leads+market) THE CLOUD MARKET<BR>
+THIS REPO WILL BE REWRITTEN IN JAVA SINCE AWS AND [STOCK MARKETS RUN ON LINUX](https://www.linuxfoundation.org/research/the-2024-state-of-open-source-in-financial-services)<BR>
+THIS REPO WILL BE REWRITTEN IN JAVA SINCE [ORACLE OWNS JAVA](https://www.oracle.com/us/corporate/citizenship/introduction/java-in-action-1886206.html)<BR>
+THIS REPO WILL BE REWRITTEN IN JAVA SINCE [ORACLE INVESTED BILLIONS FOR NEW DATACENTERS ACROSS THE USA](https://www.msn.com/en-us/money/markets/trump-announces-an-ai-infrastructure-investment-of-up-to-500-billion-involving-openai-oracle-and-softbank)<BR>
+THERE WILL BE NO FURTHER UPDATES OR MAINTENANCE PERFORMED ON THIS REPO<BR>
+[NEW REPO](https://github.com/CHRISSY-FRANKY/X-LOYALTY)<BR>
+
 # X LOYALTY :heart:
 
 X Loyalty helps you identify and divorce accounts that don't follow you back, ensuring a loyal community. 
